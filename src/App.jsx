@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Send, Hexagon, Sparkles, ArrowRight, Zap, Network, Brain } from 'lucide-react';
+import { Send, Hexagon, ArrowRight, Zap, Network, Brain, Terminal, X } from 'lucide-react';
 import AnimatedGlassBackground from './components/AnimatedGlassBackground';
 import StatusPanel from './components/StatusPanel';
 import Message from './components/Message';
@@ -47,7 +47,34 @@ const INITIAL_HISTORY = [
 ];
 
 export default function App() {
-  const [isLaunched, setIsLaunched] = useState(false);
+  const [isLaunched, setIsLaunched] = useState(() => {
+    try {
+      return localStorage.getItem('mcp_orchestrator_launched') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleLaunch = useCallback(() => {
+    try {
+      localStorage.setItem('mcp_orchestrator_launched', 'true');
+    } catch {
+      // ignore
+    }
+    setIsLaunched(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isLaunched) {
+      const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+          handleLaunch();
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isLaunched, handleLaunch]);
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -502,44 +529,119 @@ export default function App() {
     return (
       <div className="auth-card-container">
         <AnimatedGlassBackground />
-        <div className="auth-glass-card">
-          <div className="auth-icon-wrap">
-            <Hexagon size={32} color="var(--accent-primary)" strokeWidth={2.2} />
-          </div>
-          <div className="auth-badge">
-            <Sparkles size={13} color="var(--accent-primary)" />
-            <span>General-Purpose MCP Orchestrator</span>
-          </div>
-          <h1 className="auth-title">Universal Control Plane</h1>
-          <p className="auth-desc">
-            One intelligent orchestration layer sitting across multiple Model Context Protocol servers. Prioritizes real-world tasks using context signals with zero token silos.
-          </p>
-
-          <div className="auth-features-grid">
-            <div className="auth-feature-chip">
-              <Zap size={18} className="feature-chip-icon" />
-              <span className="feature-chip-name">Prioritizer</span>
-              <span className="feature-chip-desc">Context-Aware</span>
+        <div className="studio-onboarding-card">
+          {/* Top Bar: Eyebrow + Status + Dismiss */}
+          <div className="onboarding-top-bar">
+            <div className="onboarding-eyebrow">
+              <div className="onboarding-icon-hex">
+                <Hexagon size={13} color="var(--accent-primary)" />
+              </div>
+              <span className="onboarding-eyebrow-text">MCP CONTROL PLANE ARCHITECTURE</span>
             </div>
-            <div className="auth-feature-chip">
-              <Network size={18} className="feature-chip-icon" />
-              <span className="feature-chip-name">Multi-Server</span>
-              <span className="feature-chip-desc">Pluggable</span>
-            </div>
-            <div className="auth-feature-chip">
-              <Brain size={18} className="feature-chip-icon" />
-              <span className="feature-chip-name">Memory</span>
-              <span className="feature-chip-desc">Zero Silos</span>
+            <div className="onboarding-top-actions">
+              <div className="onboarding-status-pill">
+                <span className="onboarding-live-dot" />
+                <span>5 NODES READY</span>
+              </div>
+              <button
+                type="button"
+                className="onboarding-close-btn"
+                onClick={handleLaunch}
+                title="Enter Workspace"
+                aria-label="Close"
+              >
+                <X size={13} />
+              </button>
             </div>
           </div>
 
-          <button className="auth-connect-btn" onClick={() => setIsLaunched(true)}>
-            <span>Launch Orchestrator</span>
-            <ArrowRight size={17} />
-          </button>
+          {/* Hero Heading */}
+          <div className="onboarding-hero-text">
+            <h1 className="studio-onboarding-title">Universal Control Plane</h1>
+            <p className="studio-onboarding-desc">
+              Autonomous orchestration layer sitting across distributed Model Context Protocol servers. Prioritizes real-world tasks using context signals with zero token silos.
+            </p>
+          </div>
 
-          <div className="auth-footer-credits">
-            Powered by <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>Model Context Protocol</span> &bull; Neural Control Plane
+          {/* 3 Architecture Pillars */}
+          <div className="onboarding-pillars-grid">
+            <div className="pillar-card">
+              <div className="pillar-card-header">
+                <div className="pillar-icon-box">
+                  <Zap size={14} />
+                </div>
+                <span className="pillar-tag">// 01 • SCORING</span>
+              </div>
+              <h3 className="pillar-title">Dynamic Prioritizer</h3>
+              <p className="pillar-desc">
+                Context-aware signal weighting & urgency scoring across concurrent MCP tools.
+              </p>
+            </div>
+
+            <div className="pillar-card">
+              <div className="pillar-card-header">
+                <div className="pillar-icon-box">
+                  <Network size={14} />
+                </div>
+                <span className="pillar-tag">// 02 • MESH</span>
+              </div>
+              <h3 className="pillar-title">Multi-Server Fabric</h3>
+              <p className="pillar-desc">
+                Hot-pluggable stdio & SSE servers with automatic fallback and failover.
+              </p>
+            </div>
+
+            <div className="pillar-card">
+              <div className="pillar-card-header">
+                <div className="pillar-icon-box">
+                  <Brain size={14} />
+                </div>
+                <span className="pillar-tag">// 03 • CONTEXT</span>
+              </div>
+              <h3 className="pillar-title">Zero-Silo Memory</h3>
+              <p className="pillar-desc">
+                Unified working memory slots that persist intentions across independent agents.
+              </p>
+            </div>
+          </div>
+
+          {/* Live Handshake Telemetry Terminal */}
+          <div className="onboarding-terminal-box">
+            <div className="terminal-box-header">
+              <div className="terminal-dots">
+                <span className="terminal-dot red" />
+                <span className="terminal-dot yellow" />
+                <span className="terminal-dot green" />
+              </div>
+              <div className="terminal-box-title">
+                <Terminal size={11} />
+                <span>gateway-handshake.log</span>
+              </div>
+              <span className="terminal-latency-badge">⚡ 12ms</span>
+            </div>
+            <div className="terminal-code-body">
+              <div className="terminal-line">
+                <span className="t-dim">[00:01.04]</span> <span className="t-accent">gateway.init()</span> &rarr; <span className="t-success">5/5 MCP transports connected</span>
+              </div>
+              <div className="terminal-line">
+                <span className="t-dim">[00:01.12]</span> <span className="t-accent">intent.evaluator:</span> auto_route=active, zero_silo=enabled
+              </div>
+              <div className="terminal-line">
+                <span className="t-dim">[00:01.18]</span> ready for prompt dispatch &bull; <span className="t-success">0 token silos detected</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Row */}
+          <div className="onboarding-cta-wrap">
+            <button className="studio-launch-btn" onClick={handleLaunch}>
+              <span>Enter Orchestrator Workspace</span>
+              <ArrowRight size={15} />
+              <span className="studio-btn-kbd">↵</span>
+            </button>
+            <div className="onboarding-footer-credits">
+              <span>Tip: Re-open this spec anytime in Settings &bull; Preference saved in local storage</span>
+            </div>
           </div>
         </div>
       </div>
@@ -726,6 +828,7 @@ export default function App() {
         onToggleSetting={handleToggleSetting}
         onClearChat={handleClearChat}
         onResetSettings={handleResetSettings}
+        onOpenTour={() => setIsLaunched(false)}
       />
     </div>
   );

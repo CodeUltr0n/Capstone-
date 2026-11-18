@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, X, Hexagon, Sliders, Shield, Palette, Database, Trash2, RotateCcw } from 'lucide-react';
+import { Settings, X, Hexagon, Sliders, Shield, Palette, Database, Trash2, RotateCcw, Sparkles } from 'lucide-react';
 
 export default function SettingsDrawer({
   isOpen,
@@ -7,7 +7,8 @@ export default function SettingsDrawer({
   settings = {},
   onToggleSetting,
   onClearChat,
-  onResetSettings
+  onResetSettings,
+  onOpenTour
 }) {
   if (!isOpen) return null;
 
@@ -171,13 +172,25 @@ export default function SettingsDrawer({
             <div className="settings-about-box">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                 <Hexagon size={16} color="var(--accent-primary)" />
-                <span style={{ fontWeight: 800, color: '#ffffff', fontSize: '13px' }}>
-                  MCP Orchestrator v1.0
+                <span style={{ fontWeight: 700, color: '#ffffff', fontSize: '13px' }}>
+                  MCP Orchestrator v2.0
                 </span>
               </div>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
-                Universal Model Context Protocol orchestrator frontend. Built with modern React + Vite and dark crimson glass styling.
+                Universal Model Context Protocol orchestrator frontend. Built with React + Vite and neural slate styling.
               </p>
+              <button
+                type="button"
+                className="drawer-action-row-btn"
+                style={{ marginTop: '10px' }}
+                onClick={() => {
+                  onClose?.();
+                  onOpenTour?.();
+                }}
+              >
+                <Sparkles size={13} color="var(--accent-primary)" />
+                <span>View Architecture Spec & Tour</span>
+              </button>
             </div>
           </div>
         </div>
