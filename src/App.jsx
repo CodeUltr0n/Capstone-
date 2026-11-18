@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Send, Hexagon, Sparkles, ArrowRight, Zap, Network, Brain, Database, CloudRain, FolderGit2 } from 'lucide-react';
 import AnimatedGlassBackground from './components/AnimatedGlassBackground';
 import StatusPanel from './components/StatusPanel';
@@ -8,6 +8,7 @@ import ServerConfigModal from './components/ServerConfigModal';
 import SettingsDrawer from './components/SettingsDrawer';
 import ContextMemoryDrawer from './components/ContextMemoryDrawer';
 import ExecutionHistoryDrawer from './components/ExecutionHistoryDrawer';
+import Toast from './components/Toast';
 import { supabase } from './lib/supabase';
 
 // ──── Initial Seed Data ────
@@ -70,9 +71,18 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [servers, setServers] = useState(INITIAL_SERVERS);
   const [serverDetails, setServerDetails] = useState([]);
+  const [serversLoading, setServersLoading] = useState(!!supabase);
   const [activeTab, setActiveTab] = useState('chat');
+  const [toast, setToast] = useState(null);
+
+  // Derive the servers status map from serverDetails (single source of truth)
+  const servers = useMemo(() => {
+    if (serverDetails.length > 0) {
+      return Object.fromEntries(serverDetails.map(s => [s.name, s.status]));
+    }
+    return INITIAL_SERVERS;
+  }, [serverDetails]);
 
   // Modals & Drawers state
   const [isServerModalOpen, setIsServerModalOpen] = useState(false);
@@ -116,44 +126,55 @@ export default function App() {
     scrollToBottom();
   }, [messages, isLoading]);
 
+  // Helper to show a toast notification
+  const showToast = useCallback((message, type = 'error') => {
+    setToast({ message, type });
+  }, []);
+
   useEffect(() => {
-    if (!supabase) {
-      console.warn('Supabase env vars missing, using local data');
-      return;
-    }
+    if (!supabase) return;
 
     const loadServers = async () => {
+      setServersLoading(true);
       try {
-        const { data, error } = await supabase.from('mcp_servers').select('*');
+        const { data, error } = await supabase
+          .from('mcp_servers')
+          .select('id, name, url, transport, status, last_latency_ms');
 
         if (error) {
-          console.error('[supabase-debug] Failed to load MCP servers; using fallback data.', error);
-          setServers(INITIAL_SERVERS);
+          console.error('Failed to load MCP servers:', error);
           setServerDetails([]);
+          showToast('Failed to load servers from database');
           return;
         }
 
         if (!data?.length) {
-          console.warn('[supabase-debug] Supabase returned no MCP servers; using fallback data. Check table contents and read access (including RLS policies).');
-          setServers(INITIAL_SERVERS);
+          console.warn('No MCP servers found in Supabase, using fallback data.');
           setServerDetails([]);
           return;
         }
 
         setServerDetails(data);
-        setServers(Object.fromEntries(data.map(server => [server.name, server.status])));
-      } catch (error) {
-        console.error('[supabase-debug] Supabase request threw; using fallback data.', error);
-        setServers(INITIAL_SERVERS);
+      } catch (err) {
+        console.error('Supabase request threw:', err);
         setServerDetails([]);
+        showToast('Connection to database failed');
+      } finally {
+        setServersLoading(false);
       }
     };
 
     loadServers();
-  }, []);
+  }, [showToast]);
 
   const handleAddServer = async (server) => {
-    if (!supabase) return;
+    if (!supabase) return { success: false };
+
+    // Check for duplicate name
+    if (serverDetails.some(s => s.name.toLowerCase() === server.name.toLowerCase())) {
+      showToast(`Server "${server.name}" already exists`);
+      return { success: false };
+    }
 
     const { data, error } = await supabase
       .from('mcp_servers')
@@ -162,17 +183,70 @@ export default function App() {
         url: server.url,
         transport: server.transport,
         status: server.status,
-        last_latency_ms: Number.parseInt(server.latency, 10) || null,
+        last_latency_ms: parseInt(server.latency, 10) || null,
       })
-      .select()
+      .select('id, name, url, transport, status, last_latency_ms')
       .single();
 
     if (error) {
-      console.error('Unable to add MCP server to Supabase.', error);
-      return;
+      // Handle unique constraint violation
+      if (error.code === '23505') {
+        showToast(`Server "${server.name}" already exists`);
+      } else {
+        console.error('Unable to add MCP server:', error);
+        showToast('Failed to save server to database');
+      }
+      return { success: false };
     }
 
-    setServers(prev => ({ ...prev, [data.name]: data.status }));
+    setServerDetails(prev => [...prev, data]);
+    showToast('Server added successfully', 'success');
+    return { success: true };
+  };
+
+  const handleDeleteServer = async (serverToDelete) => {
+    if (!supabase) return { success: false };
+
+    // If server has an id from Supabase, delete by id; otherwise by name
+    const query = serverToDelete.id
+      ? supabase.from('mcp_servers').delete().eq('id', serverToDelete.id)
+      : supabase.from('mcp_servers').delete().eq('name', serverToDelete.name);
+
+    const { error } = await query;
+
+    if (error) {
+      console.error('Unable to delete MCP server:', error);
+      showToast('Failed to remove server from database');
+      return { success: false };
+    }
+
+    setServerDetails(prev => prev.filter(s =>
+      serverToDelete.id ? s.id !== serverToDelete.id : s.name !== serverToDelete.name
+    ));
+    showToast('Server removed', 'success');
+    return { success: true };
+  };
+
+  const handleUpdateServer = async (serverToUpdate, updates) => {
+    if (!supabase) return { success: false };
+
+    const query = serverToUpdate.id
+      ? supabase.from('mcp_servers').update(updates).eq('id', serverToUpdate.id)
+      : supabase.from('mcp_servers').update(updates).eq('name', serverToUpdate.name);
+
+    const { error } = await query.select('id, name, url, transport, status, last_latency_ms').single();
+
+    if (error) {
+      console.error('Unable to update MCP server:', error);
+      showToast('Failed to update server in database');
+      return { success: false };
+    }
+
+    setServerDetails(prev => prev.map(s => {
+      const match = serverToUpdate.id ? s.id === serverToUpdate.id : s.name === serverToUpdate.name;
+      return match ? { ...s, ...updates } : s;
+    }));
+    return { success: true };
   };
 
   // Handle BottomNav tab switching
@@ -633,7 +707,6 @@ export default function App() {
 
       {/* Server Config Modal */}
       <ServerConfigModal
-        key={serverDetails.length}
         isOpen={isServerModalOpen}
         onClose={() => {
           setIsServerModalOpen(false);
@@ -641,9 +714,14 @@ export default function App() {
         }}
         servers={servers}
         serverDetails={serverDetails}
+        serversLoading={serversLoading}
         onAddServer={handleAddServer}
-        onSaveServers={setServers}
+        onDeleteServer={handleDeleteServer}
+        onUpdateServer={handleUpdateServer}
       />
+
+      {/* Toast Notifications */}
+      <Toast toast={toast} onDismiss={() => setToast(null)} />
 
       {/* Settings Drawer */}
       <SettingsDrawer

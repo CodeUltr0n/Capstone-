@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Server, Plus, Trash2, X, Save, Zap, CheckCircle2, RefreshCw } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Server, Plus, Trash2, X, Save, Zap, CheckCircle2, RefreshCw, Loader2 } from 'lucide-react';
 
 const PRESET_SERVERS = [
   { name: 'PostgreSQL MCP', url: 'http://localhost:8001/mcp', transport: 'SSE' },
@@ -9,96 +9,97 @@ const PRESET_SERVERS = [
   { name: 'Brave Search', url: 'http://localhost:8004/mcp', transport: 'HTTP' }
 ];
 
-export default function ServerConfigModal({ isOpen, onClose, servers = {}, serverDetails = [], onAddServer, onSaveServers }) {
-  const [serverList, setServerList] = useState(() =>
-    serverDetails.length
-      ? serverDetails.map(server => ({
+export default function ServerConfigModal({
+  isOpen,
+  onClose,
+  servers = {},
+  serverDetails = [],
+  serversLoading = false,
+  onAddServer,
+  onDeleteServer,
+  onUpdateServer,
+}) {
+  // Build the display list from serverDetails (Supabase) or fallback from servers prop
+  const serverList = useMemo(() => {
+    if (serverDetails.length > 0) {
+      return serverDetails.map(server => ({
         ...server,
-        latency: server.last_latency_ms ? `${server.last_latency_ms}ms` : null
-      }))
-      : Object.entries(servers).map(([name, status], idx) => ({
-        name,
-        url: name.toLowerCase().includes('file') ? 'stdio: npx @mcp/filesystem' : `http://localhost:${8001 + idx}/mcp`,
-        status: status || 'connected',
-        transport: name.toLowerCase().includes('file') ? 'STDIO' : 'SSE',
-        latency: status === 'connected' ? '14ms' : null
-      }))
-  );
+        latency: server.last_latency_ms ? `${server.last_latency_ms}ms` : null,
+      }));
+    }
+    return Object.entries(servers).map(([name, status], idx) => ({
+      name,
+      url: name.toLowerCase().includes('file') ? 'stdio: npx @mcp/filesystem' : `http://localhost:${8001 + idx}/mcp`,
+      status: status || 'connected',
+      transport: name.toLowerCase().includes('file') ? 'STDIO' : 'SSE',
+      latency: status === 'connected' ? '14ms' : null,
+    }));
+  }, [serverDetails, servers]);
 
   const [newName, setNewName] = useState('');
   const [newUrl, setNewUrl] = useState('');
   const [newTransport, setNewTransport] = useState('SSE');
   const [showAddForm, setShowAddForm] = useState(false);
   const [pingingIndex, setPingingIndex] = useState(null);
-  const [savedSuccess, setSavedSuccess] = useState(false);
+  const [addingServer, setAddingServer] = useState(false);
+  const [deletingIndex, setDeletingIndex] = useState(null);
 
   if (!isOpen) return null;
 
-  const handleAddServer = () => {
-    if (!newName.trim()) return;
+  const handleAddServer = async () => {
+    if (!newName.trim() || addingServer) return;
+
     const server = {
       name: newName.trim(),
       url: newUrl.trim() || 'http://localhost:8080/mcp',
       transport: newTransport,
       status: 'connected',
-      latency: '14ms'
+      latency: '14ms',
     };
-    onAddServer?.(server);
-    setServerList(prev => [
-      ...prev,
-      server
-    ]);
-    setNewName('');
-    setNewUrl('');
-    setShowAddForm(false);
+
+    setAddingServer(true);
+    const result = await onAddServer?.(server);
+    setAddingServer(false);
+
+    if (result?.success !== false) {
+      setNewName('');
+      setNewUrl('');
+      setShowAddForm(false);
+    }
   };
 
-  const handleAddPreset = (preset) => {
+  const handleAddPreset = async (preset) => {
     if (serverList.some(s => s.name.toLowerCase() === preset.name.toLowerCase())) return;
+
     const server = {
       ...preset,
       status: 'connected',
-      latency: '12ms'
+      latency: '12ms',
     };
-    onAddServer?.(server);
-    setServerList(prev => [
-      ...prev,
-      server
-    ]);
+
+    await onAddServer?.(server);
   };
 
-  const handleRemoveServer = (idx) => {
-    setServerList(prev => prev.filter((_, i) => i !== idx));
+  const handleRemoveServer = async (idx) => {
+    const server = serverList[idx];
+    if (!server || deletingIndex !== null) return;
+
+    setDeletingIndex(idx);
+    await onDeleteServer?.(server);
+    setDeletingIndex(null);
   };
 
   const handlePingServer = (idx) => {
     setPingingIndex(idx);
     setTimeout(() => {
-      setServerList(prev => prev.map((s, i) => {
-        if (i === idx) {
-          return {
-            ...s,
-            status: 'connected',
-            latency: `${Math.floor(10 + Math.random() * 12)}ms`
-          };
-        }
-        return s;
-      }));
+      const newLatency = Math.floor(10 + Math.random() * 12);
+      const server = serverList[idx];
+      onUpdateServer?.(server, {
+        status: 'connected',
+        last_latency_ms: newLatency,
+      });
       setPingingIndex(null);
     }, 700);
-  };
-
-  const handleSave = () => {
-    const serverMap = {};
-    serverList.forEach(s => {
-      serverMap[s.name] = s.status || 'connected';
-    });
-    onSaveServers?.(serverMap);
-    setSavedSuccess(true);
-    setTimeout(() => {
-      setSavedSuccess(false);
-      onClose();
-    }, 600);
   };
 
   return (
@@ -142,7 +143,12 @@ export default function ServerConfigModal({ isOpen, onClose, servers = {}, serve
             <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Auto-scored by Priority Engine</span>
           </div>
 
-          {serverList.length === 0 && !showAddForm ? (
+          {serversLoading ? (
+            <div className="empty-substate">
+              <Loader2 size={28} className="spin-icon" style={{ marginBottom: '10px', opacity: 0.6 }} />
+              <p style={{ fontSize: '13px', marginBottom: '4px' }}>Loading servers…</p>
+            </div>
+          ) : serverList.length === 0 && !showAddForm ? (
             <div className="empty-substate">
               <Zap size={32} style={{ marginBottom: '10px', opacity: 0.5 }} />
               <p style={{ fontSize: '13px', marginBottom: '4px' }}>No MCP servers configured</p>
@@ -150,7 +156,7 @@ export default function ServerConfigModal({ isOpen, onClose, servers = {}, serve
             </div>
           ) : (
             serverList.map((server, idx) => (
-              <div key={idx} className="server-card-item">
+              <div key={server.id || server.name} className="server-card-item">
                 <div className={`status-dot ${server.status === 'connected' ? 'connected' : 'pending'}`} />
                 <div className="server-card-info">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -177,9 +183,13 @@ export default function ServerConfigModal({ isOpen, onClose, servers = {}, serve
                   <button
                     className="server-remove-btn"
                     onClick={() => handleRemoveServer(idx)}
+                    disabled={deletingIndex !== null}
                     title="Remove server"
                   >
-                    <Trash2 size={13} />
+                    {deletingIndex === idx
+                      ? <Loader2 size={13} className="spin-icon" />
+                      : <Trash2 size={13} />
+                    }
                   </button>
                 </div>
               </div>
@@ -234,8 +244,16 @@ export default function ServerConfigModal({ isOpen, onClose, servers = {}, serve
                 <button className="modal-btn secondary" style={{ flex: 1 }} onClick={() => setShowAddForm(false)}>
                   Cancel
                 </button>
-                <button className="modal-btn primary" style={{ flex: 1 }} onClick={handleAddServer} disabled={!newName.trim()}>
-                  <Plus size={14} /> Add Server
+                <button
+                  className="modal-btn primary"
+                  style={{ flex: 1 }}
+                  onClick={handleAddServer}
+                  disabled={!newName.trim() || addingServer}
+                >
+                  {addingServer
+                    ? <><Loader2 size={14} className="spin-icon" /> Saving…</>
+                    : <><Plus size={14} /> Add Server</>
+                  }
                 </button>
               </div>
             </div>
@@ -249,18 +267,7 @@ export default function ServerConfigModal({ isOpen, onClose, servers = {}, serve
 
         <div className="modal-footer">
           <button className="modal-btn secondary" onClick={onClose}>
-            Cancel
-          </button>
-          <button className="modal-btn primary" onClick={handleSave}>
-            {savedSuccess ? (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <CheckCircle2 size={14} color="#4ade80" /> Saved!
-              </span>
-            ) : (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Save size={14} /> Save Configuration
-              </span>
-            )}
+            Close
           </button>
         </div>
       </div>
