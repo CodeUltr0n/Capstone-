@@ -117,17 +117,14 @@ export default function App() {
   }, [messages, isLoading]);
 
   useEffect(() => {
-    const loadServers = async () => {
-      console.log('[supabase-debug] env vars defined', {
-        urlDefined: Boolean(import.meta.env.VITE_SUPABASE_URL),
-        anonKeyDefined: Boolean(import.meta.env.VITE_SUPABASE_ANON_KEY),
-      });
+    if (!supabase) {
+      console.warn('Supabase env vars missing, using local data');
+      return;
+    }
 
+    const loadServers = async () => {
       try {
         const { data, error } = await supabase.from('mcp_servers').select('*');
-        console.log('[supabase-debug] Supabase error', error);
-        console.log('[supabase-debug] rows returned', data?.length ?? 0);
-        console.log('[supabase-debug] row names', data?.map(server => server.name) ?? []);
 
         if (error) {
           console.error('[supabase-debug] Failed to load MCP servers; using fallback data.', error);
@@ -156,6 +153,8 @@ export default function App() {
   }, []);
 
   const handleAddServer = async (server) => {
+    if (!supabase) return;
+
     const { data, error } = await supabase
       .from('mcp_servers')
       .insert({
