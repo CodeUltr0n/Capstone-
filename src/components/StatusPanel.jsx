@@ -7,6 +7,7 @@ export default function StatusPanel({
   onOpenServers,
   onOpenContext,
   onOpenHistory,
+  onOpenTour,
   historyCount = 0,
   activeGoal = 'General Routing'
 }) {
@@ -50,7 +51,18 @@ export default function StatusPanel({
   return (
     <header className="header-panel collapsed-header" role="banner">
       {/* Brand & Title */}
-      <div className="header-left">
+      <div
+        className="header-left clickable-brand"
+        onClick={onOpenTour}
+        title="View Control Plane Launcher & Architecture"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            onOpenTour?.();
+          }
+        }}
+      >
         <div className="header-logo" title="MCP Orchestrator Control Plane">
           <Hexagon size={16} color="var(--accent-primary)" strokeWidth={2.4} className="header-logo-icon" />
         </div>

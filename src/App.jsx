@@ -47,21 +47,19 @@ const INITIAL_HISTORY = [
 ];
 
 export default function App() {
-  const [isLaunched, setIsLaunched] = useState(() => {
-    try {
-      return localStorage.getItem('mcp_orchestrator_launched') === 'true';
-    } catch {
-      return false;
-    }
-  });
+  const [isLaunched, setIsLaunched] = useState(false);
 
   const handleLaunch = useCallback(() => {
+    setIsLaunched(true);
+  }, []);
+
+  useEffect(() => {
+    // Clear any stale persistence flag so the launcher is always accessible
     try {
-      localStorage.setItem('mcp_orchestrator_launched', 'true');
+      localStorage.removeItem('mcp_orchestrator_launched');
     } catch {
       // ignore
     }
-    setIsLaunched(true);
   }, []);
 
   useEffect(() => {
@@ -660,6 +658,7 @@ export default function App() {
         onOpenServers={() => setIsServerModalOpen(true)}
         onOpenContext={() => setIsContextDrawerOpen(true)}
         onOpenHistory={() => setIsHistoryDrawerOpen(true)}
+        onOpenTour={() => setIsLaunched(false)}
         historyCount={executionHistory.length}
         activeGoal={contextState.activeGoals?.[0] || 'Universal Routing'}
       />
