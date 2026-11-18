@@ -8,6 +8,7 @@ import ServerConfigModal from './components/ServerConfigModal';
 import SettingsDrawer from './components/SettingsDrawer';
 import ContextMemoryDrawer from './components/ContextMemoryDrawer';
 import ExecutionHistoryDrawer from './components/ExecutionHistoryDrawer';
+import { supabase } from './lib/supabase';
 
 // ──── Initial Seed Data ────
 const INITIAL_SERVERS = {
@@ -70,6 +71,7 @@ export default function App() {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [servers, setServers] = useState(INITIAL_SERVERS);
+  const [serverDetails, setServerDetails] = useState([]);
   const [activeTab, setActiveTab] = useState('chat');
 
   // Modals & Drawers state
@@ -114,6 +116,66 @@ export default function App() {
     scrollToBottom();
   }, [messages, isLoading]);
 
+  useEffect(() => {
+    const loadServers = async () => {
+      console.log('[supabase-debug] env vars defined', {
+        urlDefined: Boolean(import.meta.env.VITE_SUPABASE_URL),
+        anonKeyDefined: Boolean(import.meta.env.VITE_SUPABASE_ANON_KEY),
+      });
+
+      try {
+        const { data, error } = await supabase.from('mcp_servers').select('*');
+        console.log('[supabase-debug] Supabase error', error);
+        console.log('[supabase-debug] rows returned', data?.length ?? 0);
+        console.log('[supabase-debug] row names', data?.map(server => server.name) ?? []);
+
+        if (error) {
+          console.error('[supabase-debug] Failed to load MCP servers; using fallback data.', error);
+          setServers(INITIAL_SERVERS);
+          setServerDetails([]);
+          return;
+        }
+
+        if (!data?.length) {
+          console.warn('[supabase-debug] Supabase returned no MCP servers; using fallback data. Check table contents and read access (including RLS policies).');
+          setServers(INITIAL_SERVERS);
+          setServerDetails([]);
+          return;
+        }
+
+        setServerDetails(data);
+        setServers(Object.fromEntries(data.map(server => [server.name, server.status])));
+      } catch (error) {
+        console.error('[supabase-debug] Supabase request threw; using fallback data.', error);
+        setServers(INITIAL_SERVERS);
+        setServerDetails([]);
+      }
+    };
+
+    loadServers();
+  }, []);
+
+  const handleAddServer = async (server) => {
+    const { data, error } = await supabase
+      .from('mcp_servers')
+      .insert({
+        name: server.name,
+        url: server.url,
+        transport: server.transport,
+        status: server.status,
+        last_latency_ms: Number.parseInt(server.latency, 10) || null,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Unable to add MCP server to Supabase.', error);
+      return;
+    }
+
+    setServers(prev => ({ ...prev, [data.name]: data.status }));
+  };
+
   // Handle BottomNav tab switching
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
@@ -139,15 +201,24 @@ export default function App() {
   // Dynamic Intent & Routing Generator for realistic interactive experience
   const generateSimulatedResponse = (query) => {
     const q = query.toLowerCase();
+    const getRegisteredServerName = (expectedName) => {
+      const searchName = expectedName.replace(/\s*MCP$/i, '').toLowerCase();
+      return Object.keys(servers).find(name => name.toLowerCase().includes(searchName)) || expectedName;
+    };
+    const databaseServer = getRegisteredServerName('PostgreSQL MCP');
+    const filesystemServer = getRegisteredServerName('Local Filesystem');
+    const weatherServer = getRegisteredServerName('Weather API');
+    const githubServer = getRegisteredServerName('GitHub MCP');
+    const braveServer = getRegisteredServerName('Brave Search');
 
     // 1. Database Intent
     if (q.includes('data') || q.includes('sql') || q.includes('order') || q.includes('table') || q.includes('revenue') || q.includes('db')) {
       return {
-        server: 'PostgreSQL MCP',
+        server: databaseServer,
         rankings: [
-          ['PostgreSQL MCP', 1.94],
-          ['Local Filesystem', 0.58],
-          ['Weather API', 0.22]
+          [databaseServer, 1.94],
+          [filesystemServer, 0.58],
+          [weatherServer, 0.22]
         ],
         tool: {
           tool: 'postgres.query_read_only',
@@ -168,7 +239,7 @@ export default function App() {
         content: [
           '### Database Query Execution',
           '',
-          'The Prioritization Engine identified **relational database query intent** and routed this request directly to the **PostgreSQL MCP** server with a **97% confidence score**.',
+          `The Prioritization Engine identified **relational database query intent** and routed this request directly to the **${databaseServer}** server with a **97% confidence score**.`,
           '',
           '#### Order Summary',
           '',
@@ -189,11 +260,11 @@ export default function App() {
     // 2. Weather Intent
     if (q.includes('weather') || q.includes('temp') || q.includes('rain') || q.includes('climate') || q.includes('wind') || q.includes('forecast') || q.includes('tokyo')) {
       return {
-        server: 'Weather API',
+        server: weatherServer,
         rankings: [
-          ['Weather API', 1.96],
-          ['Brave Search', 0.74],
-          ['PostgreSQL MCP', 0.25]
+          [weatherServer, 1.96],
+          [braveServer, 0.74],
+          [databaseServer, 0.25]
         ],
         tool: {
           tool: 'weather.get_current_and_forecast',
@@ -206,9 +277,9 @@ export default function App() {
           }
         },
         content: [
-          '### Telemetry Dispatch: Weather API',
+          `### Telemetry Dispatch: ${weatherServer}`,
           '',
-          'Context evaluation prioritized **real-time meteorological telemetry** over internal data stores. Selected **Weather API MCP** with **98% confidence**.',
+          `Context evaluation prioritized **real-time meteorological telemetry** over internal data stores. Selected **${weatherServer}** with **98% confidence**.`,
           '',
           '#### Current Environmental Conditions',
           '',
@@ -223,11 +294,11 @@ export default function App() {
     // 3. Filesystem / Code Intent
     if (q.includes('file') || q.includes('dir') || q.includes('folder') || q.includes('package') || q.includes('repo') || q.includes('inspect') || q.includes('git')) {
       return {
-        server: 'Local Filesystem',
+        server: filesystemServer,
         rankings: [
-          ['Local Filesystem', 1.91],
-          ['GitHub MCP', 1.34],
-          ['PostgreSQL MCP', 0.42]
+          [filesystemServer, 1.91],
+          [githubServer, 1.34],
+          [databaseServer, 0.42]
         ],
         tool: {
           tool: 'filesystem.read_file',
@@ -244,9 +315,9 @@ export default function App() {
           }
         },
         content: [
-          '### Workspace Inspection: Local Filesystem',
+          `### Workspace Inspection: ${filesystemServer}`,
           '',
-          'Routed directly to **Local Filesystem MCP** (transport: `stdio`). Identified target configuration file and extracted root dependencies:',
+          `Routed directly to **${filesystemServer}** (transport: \`stdio\`). Identified target configuration file and extracted root dependencies:`,
           '',
           '```json',
           '{',
@@ -270,12 +341,12 @@ export default function App() {
 
     // 4. Multi-Server Benchmark / General Fallback
     return {
-      server: 'PostgreSQL MCP',
+      server: databaseServer,
       rankings: [
-        ['PostgreSQL MCP', 1.82],
-        ['Local Filesystem', 1.45],
-        ['Weather API', 0.88],
-        ['GitHub MCP', 0.72]
+        [databaseServer, 1.82],
+        [filesystemServer, 1.45],
+        [weatherServer, 0.88],
+        [githubServer, 0.72]
       ],
       tool: {
         tool: 'orchestrator.benchmark_dispatch',
@@ -563,12 +634,15 @@ export default function App() {
 
       {/* Server Config Modal */}
       <ServerConfigModal
+        key={serverDetails.length}
         isOpen={isServerModalOpen}
         onClose={() => {
           setIsServerModalOpen(false);
           setActiveTab('chat');
         }}
         servers={servers}
+        serverDetails={serverDetails}
+        onAddServer={handleAddServer}
         onSaveServers={setServers}
       />
 
