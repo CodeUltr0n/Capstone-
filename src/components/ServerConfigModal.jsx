@@ -9,15 +9,20 @@ const PRESET_SERVERS = [
   { name: 'Brave Search', url: 'http://localhost:8004/mcp', transport: 'HTTP' }
 ];
 
-export default function ServerConfigModal({ isOpen, onClose, servers = {}, onSaveServers }) {
+export default function ServerConfigModal({ isOpen, onClose, servers = {}, serverDetails = [], onAddServer, onSaveServers }) {
   const [serverList, setServerList] = useState(() =>
-    Object.entries(servers).map(([name, status], idx) => ({
-      name,
-      url: name.toLowerCase().includes('file') ? 'stdio: npx @mcp/filesystem' : `http://localhost:${8001 + idx}/mcp`,
-      status: status || 'connected',
-      transport: name.toLowerCase().includes('file') ? 'STDIO' : 'SSE',
-      latency: status === 'connected' ? '14ms' : null
-    }))
+    serverDetails.length
+      ? serverDetails.map(server => ({
+        ...server,
+        latency: server.last_latency_ms ? `${server.last_latency_ms}ms` : null
+      }))
+      : Object.entries(servers).map(([name, status], idx) => ({
+        name,
+        url: name.toLowerCase().includes('file') ? 'stdio: npx @mcp/filesystem' : `http://localhost:${8001 + idx}/mcp`,
+        status: status || 'connected',
+        transport: name.toLowerCase().includes('file') ? 'STDIO' : 'SSE',
+        latency: status === 'connected' ? '14ms' : null
+      }))
   );
 
   const [newName, setNewName] = useState('');
@@ -31,15 +36,17 @@ export default function ServerConfigModal({ isOpen, onClose, servers = {}, onSav
 
   const handleAddServer = () => {
     if (!newName.trim()) return;
+    const server = {
+      name: newName.trim(),
+      url: newUrl.trim() || 'http://localhost:8080/mcp',
+      transport: newTransport,
+      status: 'connected',
+      latency: '14ms'
+    };
+    onAddServer?.(server);
     setServerList(prev => [
       ...prev,
-      {
-        name: newName.trim(),
-        url: newUrl.trim() || 'http://localhost:8080/mcp',
-        transport: newTransport,
-        status: 'connected',
-        latency: '14ms'
-      }
+      server
     ]);
     setNewName('');
     setNewUrl('');
@@ -48,13 +55,15 @@ export default function ServerConfigModal({ isOpen, onClose, servers = {}, onSav
 
   const handleAddPreset = (preset) => {
     if (serverList.some(s => s.name.toLowerCase() === preset.name.toLowerCase())) return;
+    const server = {
+      ...preset,
+      status: 'connected',
+      latency: '12ms'
+    };
+    onAddServer?.(server);
     setServerList(prev => [
       ...prev,
-      {
-        ...preset,
-        status: 'connected',
-        latency: '12ms'
-      }
+      server
     ]);
   };
 
