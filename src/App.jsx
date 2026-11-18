@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Send, Hexagon, Sparkles, ArrowRight, Zap, Network, Brain, Database, CloudRain, FolderGit2 } from 'lucide-react';
+import { Send, Hexagon, Sparkles, ArrowRight, Zap, Network, Brain, Database, CloudRain, FolderGit2, ArrowUpRight, Terminal } from 'lucide-react';
 import AnimatedGlassBackground from './components/AnimatedGlassBackground';
 import StatusPanel from './components/StatusPanel';
 import Message from './components/Message';
@@ -23,28 +23,47 @@ const INITIAL_SERVERS = {
 const STARTER_PROMPTS = [
   {
     icon: Database,
+    tag: '// 01 • RELATIONAL STORE',
+    targetServer: 'PostgreSQL MCP',
     title: 'Query Database Records',
-    desc: 'Filter customer transactions & compute order totals',
+    desc: 'Filter customer transactions & compute aggregated order revenues',
+    preview: 'SELECT order_id, client, amount_usd FROM orders LIMIT 4;',
     query: 'Query the database for the top 5 highest-value orders this week and calculate revenue.'
   },
   {
     icon: CloudRain,
-    title: 'Live Weather Telemetry',
-    desc: 'Fetch multi-city forecast & barometric conditions',
+    tag: '// 02 • STREAMING TELEMETRY',
+    targetServer: 'Weather API',
+    title: 'Live Environmental Telemetry',
+    desc: 'Fetch multi-city atmospheric readings & barometric trends',
+    preview: 'GET /v1/telemetry?cities=tokyo,newyork&metrics=wind,temp',
     query: 'Get the current weather forecast, wind speed, and precipitation for Tokyo and New York.'
   },
   {
     icon: FolderGit2,
+    tag: '// 03 • WORKSPACE INSPECTION',
+    targetServer: 'Local Filesystem',
     title: 'Scan Local Repository',
-    desc: 'Inspect project directory structure & dependencies',
+    desc: 'Inspect workspace dependency tree & root package manifests',
+    preview: 'stdio: fs.read_file("./package.json", { parse: true })',
     query: 'Inspect our workspace directory for package.json and list all declared dependencies.'
   },
   {
     icon: Network,
-    title: 'Multi-Server Priority Test',
-    desc: 'Benchmark concurrent routing across all MCP servers',
+    tag: '// 04 • BENCHMARK ENGINE',
+    targetServer: 'Control Plane',
+    title: 'Multi-Server Priority Benchmark',
+    desc: 'Simulate concurrent intent evaluation across all MCP nodes',
+    preview: 'dispatch.parallel([db, weather, fs], { zeroSilo: true })',
     query: 'Benchmark orchestration latency across database, filesystem, and external weather MCP servers.'
   }
+];
+
+const QUICK_INTENT_CHIPS = [
+  { label: '🗄️ Query Orders', query: 'Query the database for the top 5 highest-value orders this week and calculate revenue.' },
+  { label: '⛅ Tokyo Weather', query: 'Get the current weather forecast, wind speed, and precipitation for Tokyo and New York.' },
+  { label: '📁 package.json', query: 'Inspect our workspace directory for package.json and list all declared dependencies.' },
+  { label: '⚡ Priority Test', query: 'Benchmark orchestration latency across database, filesystem, and external weather MCP servers.' },
 ];
 
 const INITIAL_HISTORY = [
@@ -586,33 +605,47 @@ export default function App() {
       <main className="main-content">
         <div className="chat-container">
           <div className="messages-list" ref={messagesListRef}>
-            {/* Empty State with Starter Prompts */}
+            {/* Empty State with Awwwards Bento Grid */}
             {messages.length === 0 && (
               <div className="empty-state-container">
-                <div className="empty-state-icon-wrap">
-                  <Hexagon size={32} color="var(--accent-primary)" strokeWidth={2.2} />
+                <div className="bento-hero-badge">
+                  <span className="bento-badge-dot" />
+                  <span>UNIVERSAL MCP ROUTING ENGINE</span>
                 </div>
-                <h2 className="empty-state-title">Orchestrator Ready</h2>
-                <p className="empty-state-subtitle">
-                  Select a starter scenario or ask any task. The prioritization engine will rank and route across your registered MCP servers.
+                <h1 className="bento-hero-title">Orchestrator Ready</h1>
+                <p className="bento-hero-sub">
+                  Natural-language prioritization across independent Model Context Protocol servers with zero token silo overhead.
                 </p>
 
-                {/* Starter Prompts Grid */}
-                <div className="starter-prompts-grid">
+                {/* Bento Grid */}
+                <div className="bento-grid">
                   {STARTER_PROMPTS.map((p, idx) => {
                     const Icon = p.icon;
                     return (
                       <button
                         key={idx}
-                        className="starter-prompt-card"
+                        type="button"
+                        className="bento-card"
                         onClick={() => handleSend(p.query)}
                       >
-                        <div className="prompt-card-icon-wrap">
-                          <Icon size={16} color="var(--accent-primary)" />
+                        <div className="bento-card-top">
+                          <span className="bento-tag">{p.tag}</span>
+                          <span className="bento-server-pill">{p.targetServer}</span>
                         </div>
-                        <div className="prompt-card-text">
-                          <div className="prompt-card-title">{p.title}</div>
-                          <div className="prompt-card-desc">{p.desc}</div>
+
+                        <div className="bento-title-row">
+                          <div className="bento-icon-wrap">
+                            <Icon size={14} color="var(--accent-primary)" />
+                          </div>
+                          <span className="bento-card-title">{p.title}</span>
+                          <ArrowUpRight size={14} className="bento-arrow-icon" />
+                        </div>
+
+                        <p className="bento-card-desc">{p.desc}</p>
+
+                        <div className="bento-code-snippet">
+                          <Terminal size={10} className="snippet-icon" />
+                          <code>{p.preview}</code>
                         </div>
                       </button>
                     );
@@ -647,31 +680,64 @@ export default function App() {
         </div>
       </main>
 
-      {/* Bottom Dock */}
-      <div className="bottom-dock">
-        <div className="input-container">
-          <div className="input-box">
-            <input
-              type="text"
-              className="chat-input"
-              placeholder="Ask anything (e.g. 'Query database orders', 'Scan local files', 'Check Tokyo weather')..."
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={handleKeyDown}
-              onFocus={() => setTimeout(scrollToBottom, 150)}
-              disabled={isLoading}
-            />
+      {/* Floating Command Dock */}
+      <div className="floating-command-dock">
+        {/* Quick Intent Chips */}
+        <div className="quick-chips-row">
+          <span className="quick-chips-label">QUICK ROUTE:</span>
+          {QUICK_INTENT_CHIPS.map((chip, idx) => (
             <button
-              className="send-button"
-              onClick={() => handleSend()}
-              disabled={!inputValue.trim() || isLoading}
-              aria-label="Send query to orchestrator"
+              key={idx}
+              type="button"
+              className="quick-chip-btn"
+              onClick={() => handleSend(chip.query)}
+              disabled={isLoading}
             >
-              <Send size={16} />
+              {chip.label}
             </button>
+          ))}
+        </div>
+
+        {/* Command Input Island */}
+        <div className="command-input-island">
+          <div className="dock-mode-pill" title="Dynamic intent prioritization">
+            <Zap size={11} />
+            <span>Auto-Route</span>
           </div>
-          <div className="footer-credits">
-            Powered by <span className="credit-highlight">Model Context Protocol</span> &bull; General-Purpose Orchestrator
+
+          <input
+            type="text"
+            className="chat-input"
+            placeholder="Type a task or select a prompt above..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onFocus={() => setTimeout(scrollToBottom, 150)}
+            disabled={isLoading}
+          />
+
+          <button
+            className="send-button"
+            onClick={() => handleSend()}
+            disabled={!inputValue.trim() || isLoading}
+            aria-label="Send query to orchestrator"
+          >
+            <Send size={13} />
+            <kbd className="dock-kbd-badge">↵</kbd>
+          </button>
+        </div>
+
+        {/* Dock Telemetry Bar */}
+        <div className="dock-telemetry-bar">
+          <div className="dock-telemetry-left">
+            <span className="telemetry-live-dot" />
+            <span>{Object.keys(servers).length} MCP NODES CONNECTED</span>
+          </div>
+          <div className="dock-telemetry-item">
+            <span>LATENCY: <strong>14MS</strong></span>
+          </div>
+          <div className="dock-telemetry-item">
+            <span>TOKEN SAVINGS: <strong>86.2%</strong></span>
           </div>
         </div>
 

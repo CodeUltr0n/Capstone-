@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Shield, ChevronDown, Settings, Hexagon, Brain, History, Server, Activity } from 'lucide-react';
+import { Shield, ChevronDown, Settings, Hexagon, Brain, History, Server } from 'lucide-react';
 
 export default function StatusPanel({
   servers = {},
@@ -62,6 +62,13 @@ export default function StatusPanel({
 
       {/* Middle Context & Latency Ambient Badges */}
       <div className="header-center-ambient">
+        <div className="header-hud-ticker" title="Control plane health status">
+          <span className="telemetry-live-dot" />
+          <span className="hud-ticker-label">ROUTER ONLINE</span>
+          <span className="hud-ticker-div">&bull;</span>
+          <span className="hud-ticker-stat">14ms</span>
+        </div>
+
         <button
           type="button"
           className="ambient-pill-btn context-pill"
@@ -71,11 +78,6 @@ export default function StatusPanel({
           <Brain size={12} color="var(--accent-primary)" />
           <span className="ambient-pill-text">{activeGoal}</span>
         </button>
-
-        <div className="ambient-pill-btn latency-pill" title="Gateway routing latency">
-          <Activity size={12} color="var(--status-success)" />
-          <span>14ms</span>
-        </div>
       </div>
 
       {/* Right Actions Cluster */}
