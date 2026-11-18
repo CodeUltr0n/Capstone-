@@ -120,20 +120,20 @@ export default function SettingsDrawer({
           <div className="settings-section">
             <div className="settings-section-title">
               <Palette size={12} style={{ display: 'inline', marginRight: '6px' }} />
-              Red Glass Tone
+              Theme Appearance
             </div>
             <div className="theme-palette-row">
               <div className="palette-chip active">
-                <span className="palette-dot" style={{ background: '#ff4444' }} />
-                <span>Crimson Red</span>
+                <span className="palette-dot" style={{ background: '#3b82f6' }} />
+                <span>Neural Slate</span>
               </div>
               <div className="palette-chip">
-                <span className="palette-dot" style={{ background: '#e11d48' }} />
-                <span>Deep Wine</span>
+                <span className="palette-dot" style={{ background: '#6366f1' }} />
+                <span>Indigo Dusk</span>
               </div>
               <div className="palette-chip">
-                <span className="palette-dot" style={{ background: '#f43f5e' }} />
-                <span>Ruby Silk</span>
+                <span className="palette-dot" style={{ background: '#71717a' }} />
+                <span>Zinc Minimal</span>
               </div>
             </div>
           </div>

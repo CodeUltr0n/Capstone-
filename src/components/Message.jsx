@@ -99,7 +99,7 @@ export default function Message({ msg, _isLatestAgentMsg, _isThinking }) {
                 onClick={handleCopy}
                 title="Copy response"
               >
-                {copied ? <Check size={12} color="#4ade80" /> : <Copy size={12} />}
+                {copied ? <Check size={12} color="var(--status-success)" /> : <Copy size={12} />}
                 <span>{copied ? 'Copied' : 'Copy'}</span>
               </button>
 

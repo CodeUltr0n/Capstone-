@@ -52,7 +52,7 @@ export default function StatusPanel({
       {/* Brand & Title */}
       <div className="header-left">
         <div className="header-logo" title="MCP Orchestrator Control Plane">
-          <Hexagon size={17} color="#ff5555" strokeWidth={2.4} className="header-logo-icon" />
+          <Hexagon size={16} color="var(--accent-primary)" strokeWidth={2.4} className="header-logo-icon" />
         </div>
         <div className="header-brand-wrap">
           <span className="header-brand">MCP Orchestrator</span>
@@ -73,7 +73,7 @@ export default function StatusPanel({
         </button>
 
         <div className="ambient-pill-btn latency-pill" title="Gateway routing latency">
-          <Activity size={12} color="#4ade80" />
+          <Activity size={12} color="var(--status-success)" />
           <span>14ms</span>
         </div>
       </div>

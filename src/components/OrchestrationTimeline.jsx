@@ -185,8 +185,8 @@ export default function OrchestrationTimeline({ activeServer, rankings, _query, 
                         style={{
                           width: `${barWidth}%`,
                           background: isSelected
-                            ? 'linear-gradient(90deg, rgba(255, 68, 68, 0.3) 0%, rgba(220, 38, 38, 0.15) 100%)'
-                            : 'rgba(255, 255, 255, 0.05)',
+                            ? 'linear-gradient(90deg, rgba(59, 130, 246, 0.25) 0%, rgba(37, 99, 235, 0.12) 100%)'
+                            : 'rgba(255, 255, 255, 0.04)',
                         }}
                       />
                       <span className="server-row-title">{s.label}</span>

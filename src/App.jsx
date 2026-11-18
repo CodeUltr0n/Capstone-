@@ -524,10 +524,10 @@ export default function App() {
         <AnimatedGlassBackground />
         <div className="auth-glass-card">
           <div className="auth-icon-wrap">
-            <Hexagon size={34} color="#ff4444" strokeWidth={2.2} />
+            <Hexagon size={32} color="var(--accent-primary)" strokeWidth={2.2} />
           </div>
           <div className="auth-badge">
-            <Sparkles size={13} color="#ff6b6b" />
+            <Sparkles size={13} color="var(--accent-primary)" />
             <span>General-Purpose MCP Orchestrator</span>
           </div>
           <h1 className="auth-title">Universal Control Plane</h1>
@@ -559,7 +559,7 @@ export default function App() {
           </button>
 
           <div className="auth-footer-credits">
-            Powered by <span style={{ color: '#ff6b6b', fontWeight: 600 }}>Model Context Protocol</span> &bull; Red Glass Edition
+            Powered by <span style={{ color: 'var(--accent-primary)', fontWeight: 600 }}>Model Context Protocol</span> &bull; Neural Control Plane
           </div>
         </div>
       </div>
@@ -590,7 +590,7 @@ export default function App() {
             {messages.length === 0 && (
               <div className="empty-state-container">
                 <div className="empty-state-icon-wrap">
-                  <Hexagon size={34} color="#ff4444" strokeWidth={2.2} />
+                  <Hexagon size={32} color="var(--accent-primary)" strokeWidth={2.2} />
                 </div>
                 <h2 className="empty-state-title">Orchestrator Ready</h2>
                 <p className="empty-state-subtitle">

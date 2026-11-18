@@ -26,7 +26,7 @@ export default function BottomNav({ activeTab = 'chat', onTabChange }) {
             title={tab.label}
           >
             <div className="tab-icon-wrap">
-              <Icon size={20} strokeWidth={isActive ? 2.4 : 1.8} />
+              <Icon size={18} strokeWidth={isActive ? 2.1 : 1.6} />
               {isActive && <span className="tab-active-indicator" />}
             </div>
             <span className="tab-text-label">{tab.label}</span>

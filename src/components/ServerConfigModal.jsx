@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Server, Plus, Trash2, X, Save, Zap, CheckCircle2, RefreshCw, Loader2 } from 'lucide-react';
+import { Server, Plus, Trash2, X, Zap, CheckCircle2, RefreshCw, Loader2 } from 'lucide-react';
 
 const PRESET_SERVERS = [
   { name: 'PostgreSQL MCP', url: 'http://localhost:8001/mcp', transport: 'SSE' },
@@ -129,7 +129,7 @@ export default function ServerConfigModal({
                     onClick={() => !isAdded && handleAddPreset(p)}
                     disabled={isAdded}
                   >
-                    {isAdded ? <CheckCircle2 size={11} color="#4ade80" /> : <Plus size={11} />}
+                    {isAdded ? <CheckCircle2 size={11} color="var(--status-success)" /> : <Plus size={11} />}
                     <span>{p.name}</span>
                   </button>
                 );

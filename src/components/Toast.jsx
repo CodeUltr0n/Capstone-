@@ -15,8 +15,8 @@ export default function Toast({ toast, onDismiss }) {
   return (
     <div className={`toast-notification ${isSuccess ? 'toast-success' : 'toast-error'}`}>
       {isSuccess
-        ? <CheckCircle2 size={15} color="#4ade80" />
-        : <AlertCircle size={15} color="#ff6b6b" />
+        ? <CheckCircle2 size={15} color="#34d399" />
+        : <AlertCircle size={15} color="#f87171" />
       }
       <span className="toast-message">{toast.message}</span>
       <button className="toast-dismiss" onClick={onDismiss} aria-label="Dismiss">
