@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { Send, Hexagon, Sparkles, ArrowRight, Zap, Network, Brain, Database, CloudRain, FolderGit2, ArrowUpRight, Terminal } from 'lucide-react';
+import { Send, Hexagon, Sparkles, ArrowRight, Zap, Network, Brain } from 'lucide-react';
 import AnimatedGlassBackground from './components/AnimatedGlassBackground';
 import StatusPanel from './components/StatusPanel';
 import Message from './components/Message';
@@ -19,45 +19,6 @@ const INITIAL_SERVERS = {
   'GitHub MCP': 'connected',
   'Brave Search': 'pending',
 };
-
-const STARTER_PROMPTS = [
-  {
-    icon: Database,
-    tag: '// 01 • RELATIONAL STORE',
-    targetServer: 'PostgreSQL MCP',
-    title: 'Query Database Records',
-    desc: 'Filter customer transactions & compute aggregated order revenues',
-    preview: 'SELECT order_id, client, amount_usd FROM orders LIMIT 4;',
-    query: 'Query the database for the top 5 highest-value orders this week and calculate revenue.'
-  },
-  {
-    icon: CloudRain,
-    tag: '// 02 • STREAMING TELEMETRY',
-    targetServer: 'Weather API',
-    title: 'Live Environmental Telemetry',
-    desc: 'Fetch multi-city atmospheric readings & barometric trends',
-    preview: 'GET /v1/telemetry?cities=tokyo,newyork&metrics=wind,temp',
-    query: 'Get the current weather forecast, wind speed, and precipitation for Tokyo and New York.'
-  },
-  {
-    icon: FolderGit2,
-    tag: '// 03 • WORKSPACE INSPECTION',
-    targetServer: 'Local Filesystem',
-    title: 'Scan Local Repository',
-    desc: 'Inspect workspace dependency tree & root package manifests',
-    preview: 'stdio: fs.read_file("./package.json", { parse: true })',
-    query: 'Inspect our workspace directory for package.json and list all declared dependencies.'
-  },
-  {
-    icon: Network,
-    tag: '// 04 • BENCHMARK ENGINE',
-    targetServer: 'Control Plane',
-    title: 'Multi-Server Priority Benchmark',
-    desc: 'Simulate concurrent intent evaluation across all MCP nodes',
-    preview: 'dispatch.parallel([db, weather, fs], { zeroSilo: true })',
-    query: 'Benchmark orchestration latency across database, filesystem, and external weather MCP servers.'
-  }
-];
 
 const QUICK_INTENT_CHIPS = [
   { label: '🗄️ Query Orders', query: 'Query the database for the top 5 highest-value orders this week and calculate revenue.' },
@@ -605,52 +566,20 @@ export default function App() {
       <main className="main-content">
         <div className="chat-container">
           <div className="messages-list" ref={messagesListRef}>
-            {/* Empty State with Awwwards Bento Grid */}
+            {/* Minimalist Premium Hero */}
             {messages.length === 0 && (
               <div className="empty-state-container">
+                <div className="empty-state-icon-wrap">
+                  <Hexagon size={28} color="var(--accent-primary)" strokeWidth={2.2} />
+                </div>
                 <div className="bento-hero-badge">
                   <span className="bento-badge-dot" />
-                  <span>UNIVERSAL MCP ROUTING ENGINE</span>
+                  <span>UNIVERSAL CONTROL PLANE</span>
                 </div>
-                <h1 className="bento-hero-title">Orchestrator Ready</h1>
+                <h1 className="bento-hero-title">Where should we orchestrate?</h1>
                 <p className="bento-hero-sub">
-                  Natural-language prioritization across independent Model Context Protocol servers with zero token silo overhead.
+                  Ask any question or dispatch tasks. The prioritization engine scores intent and routes to your registered MCP servers with zero token overhead.
                 </p>
-
-                {/* Bento Grid */}
-                <div className="bento-grid">
-                  {STARTER_PROMPTS.map((p, idx) => {
-                    const Icon = p.icon;
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        className="bento-card"
-                        onClick={() => handleSend(p.query)}
-                      >
-                        <div className="bento-card-top">
-                          <span className="bento-tag">{p.tag}</span>
-                          <span className="bento-server-pill">{p.targetServer}</span>
-                        </div>
-
-                        <div className="bento-title-row">
-                          <div className="bento-icon-wrap">
-                            <Icon size={14} color="var(--accent-primary)" />
-                          </div>
-                          <span className="bento-card-title">{p.title}</span>
-                          <ArrowUpRight size={14} className="bento-arrow-icon" />
-                        </div>
-
-                        <p className="bento-card-desc">{p.desc}</p>
-
-                        <div className="bento-code-snippet">
-                          <Terminal size={10} className="snippet-icon" />
-                          <code>{p.preview}</code>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
               </div>
             )}
 
