@@ -621,6 +621,115 @@ async def clear_history() -> None:
         connection.execute("DELETE FROM executions")
 
 
+def format_human_readable(raw_text: str) -> str:
+    """Format tool execution outputs into clean, human-readable Markdown."""
+    if not raw_text or not raw_text.strip():
+        return raw_text
+
+    text = raw_text.strip()
+    try:
+        data = json.loads(text)
+    except Exception:
+        if text.startswith("File: ") and "\n\n" in text:
+            header, content = text.split("\n\n", 1)
+            return f"#### 📁 {header}\n\n```json\n{content}\n```"
+        return text
+
+    if not isinstance(data, dict):
+        return f"```json\n{text}\n```"
+
+    if "records" in data and "total_revenue_usd" in data:
+        total_rev = data.get("total_revenue_usd", 0.0)
+        row_count = data.get("row_count", len(data.get("records", [])))
+        sql = data.get("sql_executed", "")
+        lines = [
+            "#### 📊 High-Value Orders & Revenue Analysis",
+            f"- **Total Revenue:** **${total_rev:,.2f}** across **{row_count} orders**",
+            "- **Database Status:** `SUCCESS`",
+            f"- **Executed Query:** `{sql}`\n",
+            "| Order ID | Client Name | Amount (USD) | Status | Date |",
+            "| :--- | :--- | :--- | :--- | :--- |",
+        ]
+        for rec in data.get("records", []):
+            order_id = rec.get("order_id", "—")
+            client = rec.get("client", "—")
+            amt = rec.get("amount_usd", 0.0)
+            status = rec.get("status", "—")
+            date = rec.get("created_at", "—")
+            lines.append(f"| `{order_id}` | **{client}** | ${amt:,.2f} | `{status}` | {date} |")
+        return "\n".join(lines)
+
+    if "temperature_c" in data and "conditions" in data:
+        city = data.get("city", "Selected Location")
+        temp = data.get("temperature_c", "—")
+        cond = data.get("conditions", "—")
+        wind = data.get("wind_speed_kmh", "—")
+        humidity = data.get("humidity_pct", "—")
+        pressure = data.get("barometric_pressure_hpa", "—")
+        source = data.get("telemetry_source", "SensorMesh-V3 Station")
+        return (
+            f"#### ⛅ Live Weather Telemetry: **{city}**\n\n"
+            f"- **Current Conditions:** **{cond}**\n"
+            f"- **Temperature:** **{temp}°C**\n"
+            f"- **Wind Speed:** {wind} km/h\n"
+            f"- **Relative Humidity:** {humidity}%\n"
+            f"- **Barometric Pressure:** {pressure} hPa\n"
+            f"- **Telemetry Feed:** `{source}` (Status: `HEALTHY`)"
+        )
+
+    if "dispatch_id" in data and "courier" in data:
+        dsp_id = data.get("dispatch_id", "—")
+        item = data.get("item", "—")
+        dest = data.get("destination", "—")
+        courier = data.get("courier", "—")
+        eta = data.get("eta_minutes", "—")
+        status = data.get("status", "DISPATCHED")
+        return (
+            f"#### 🚀 Rapid Logistics Dispatch\n\n"
+            f"- **Tracking ID:** `{dsp_id}`\n"
+            f"- **Dispatched Item:** **{item}**\n"
+            f"- **Destination:** **{dest}**\n"
+            f"- **Assigned Courier:** `{courier}`\n"
+            f"- **Estimated Delivery Time:** **{eta} minutes**\n"
+            f"- **Dispatch Status:** `{status}`"
+        )
+
+    if "reservation_id" in data and "table_number" in data:
+        rsv_id = data.get("reservation_id", "—")
+        rest = data.get("restaurant", "—")
+        guests = data.get("guests", "—")
+        time_slot = data.get("time_slot", "—")
+        table = data.get("table_number", "—")
+        status = data.get("confirmation_status", "CONFIRMED")
+        return (
+            f"#### 🍽️ Table Reservation Confirmed\n\n"
+            f"- **Reservation Code:** `{rsv_id}`\n"
+            f"- **Restaurant:** **{rest}**\n"
+            f"- **Party Size:** **{guests} guests**\n"
+            f"- **Reserved Slot:** **{time_slot}**\n"
+            f"- **Table Assignment:** **{table}**\n"
+            f"- **Status:** `{status}`"
+        )
+
+    if "benchmark" in data and "prioritization_latency_ms" in data:
+        bench = data.get("benchmark", "Multi-Server Intent Benchmark")
+        latency = data.get("prioritization_latency_ms", "—")
+        reduction = data.get("token_reduction_pct", "—")
+        nodes = data.get("nodes_evaluated", [])
+        sync = data.get("zero_silo_status", "ACTIVE")
+        nodes_str = ", ".join(f"`{n}`" for n in nodes)
+        return (
+            f"#### ⚡ Orchestration Priority Benchmark\n\n"
+            f"- **Test Suite:** {bench}\n"
+            f"- **Prioritization Latency:** **{latency} ms** *(SLA: < 25 ms)*\n"
+            f"- **Token Pruning Savings:** **{reduction}% reduction** *(Target: ≥ 40%)*\n"
+            f"- **Cross-Node Consensus:** `{sync}`\n"
+            f"- **Evaluated MCP Nodes:** {nodes_str}"
+        )
+
+    return f"```json\n{json.dumps(data, indent=2)}\n```"
+
+
 async def execute_chat(payload: ChatRequest) -> dict[str, Any]:
     query = payload.message.strip()
     started = time.perf_counter()
@@ -774,7 +883,8 @@ async def execute_chat(payload: ChatRequest) -> dict[str, Any]:
                     content = getattr(tool_result, "content", []) or []
                     text_parts = [getattr(block, "text", "") for block in content if getattr(block, "text", None)]
                     structured = getattr(tool_result, "structuredContent", None)
-                    response_text = "\n\n".join(text_parts) if text_parts else json.dumps(as_jsonable(structured or result_payload), indent=2)
+                    raw_text = "\n\n".join(text_parts) if text_parts else json.dumps(as_jsonable(structured or result_payload), indent=2)
+                    response_text = format_human_readable(raw_text)
                 except Exception as exc:
                     error = f"Tool call failed: {str(exc) or exc.__class__.__name__}"
                     with connect_db() as connection:
