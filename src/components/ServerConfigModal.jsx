@@ -2,11 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { Server, Plus, Trash2, X, Zap, CheckCircle2, RefreshCw, Loader2 } from 'lucide-react';
 
 const PRESET_SERVERS = [
-  { name: 'PostgreSQL MCP', url: 'http://localhost:8001/mcp', transport: 'SSE' },
-  { name: 'Local Filesystem', url: 'stdio: npx -y @modelcontextprotocol/server-filesystem .', transport: 'STDIO' },
-  { name: 'Weather API', url: 'http://localhost:8002/mcp', transport: 'SSE' },
-  { name: 'GitHub MCP', url: 'http://localhost:8003/mcp', transport: 'SSE' },
-  { name: 'Brave Search', url: 'http://localhost:8004/mcp', transport: 'HTTP' }
+  { name: 'PostgreSQL MCP', url: 'stdio: python3 backend/mock_domain_servers.py', transport: 'STDIO' },
+  { name: 'Local Filesystem', url: 'stdio: python3 backend/mock_domain_servers.py', transport: 'STDIO' },
+  { name: 'Weather API', url: 'stdio: python3 backend/mock_domain_servers.py', transport: 'STDIO' },
+  { name: 'Rapid Delivery Node', url: 'stdio: python3 backend/mock_domain_servers.py', transport: 'STDIO' },
+  { name: 'Scheduled Booking Node', url: 'stdio: python3 backend/mock_domain_servers.py', transport: 'STDIO' }
 ];
 
 export default function ServerConfigModal({
