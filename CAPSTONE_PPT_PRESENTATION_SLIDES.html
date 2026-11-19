@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capstone PPT Presentation Slides — Copy-Paste Ready</title>
+  <style>
+    :root {
+      --bg: #09090b;
+      --card-bg: #121216;
+      --border: #27272a;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --text: #f4f4f5;
+      --text-muted: #a1a1aa;
+      --code-bg: #18181b;
+      --table-header: #1e1e24;
+      --success: #10b981;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      padding: 30px 20px 80px;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .header-box {
+      text-align: center;
+      margin-bottom: 35px;
+      padding: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .header-box h1 {
+      font-size: 24px;
+      color: #fff;
+      margin-bottom: 8px;
+    }
+    .header-box p {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .quick-tip {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 25px;
+      font-size: 13.5px;
+      color: #93c5fd;
+    }
+    .slide-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .slide-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .slide-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--accent-hover);
+    }
+    .copy-btn {
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .copy-btn:hover {
+      background: var(--accent);
+      transform: translateY(-1px);
+    }
+    .copy-btn.copied {
+      background: var(--success);
+      border-color: var(--success);
+    }
+    .slide-content h3 {
+      font-size: 15px;
+      margin: 14px 0 8px;
+      color: #fff;
+    }
+    .slide-content ul, .slide-content ol {
+      margin-left: 20px;
+      margin-bottom: 12px;
+      font-size: 13.5px;
+    }
+    .slide-content li {
+      margin-bottom: 6px;
+      color: #d4d4d8;
+    }
+    .slide-content p {
+      font-size: 13.5px;
+      color: #d4d4d8;
+      margin-bottom: 10px;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      overflow-x: auto;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: #e4e4e7;
+      margin: 12px 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 9px 12px;
+      text-align: left;
+    }
+    th {
+      background: var(--table-header);
+      color: #fff;
+      font-weight: 600;
+    }
+    tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    tr:hover {
+      background: rgba(59, 130, 246, 0.05);
+    }
+    .table-caption {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--accent-hover);
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-box">
+      <h1>🎓 Capstone Final Review — Copy-Paste Slide Deck</h1>
+      <p>MCP-Orchestrator | VIT-AP University (SDP ID: AP2026272000419) | Slot D2+TD2</p>
+    </div>
+
+    <div class="quick-tip">
+      💡 <strong>Pro Tip for PowerPoint & Google Slides:</strong> You can select any table below directly with your mouse and paste (<code>Cmd+V</code> / <code>Ctrl+V</code>) into your PowerPoint slide—PowerPoint will automatically format it as a native, fully editable table!
+    </div>
+
+    <!-- SLIDE 1 -->
+    <div class="slide-card" id="slide1">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 1 — Title Slide</span>
+        <button class="copy-btn" onclick="copySlide('slide1-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide1-body">
+<pre>
+CAPSTONE FINAL REVIEW
+PROJECT VIVA-VOCE
+
+MCP - ORCHESTRATOR
+A Pluggable, Context-Aware Orchestration Framework for
+Prioritizing Real-World Agent Tasks Across Heterogeneous
+Model Context Protocol Servers
+
+Supervised By: Prof. Prachi Jain
+SDP Id: AP2026272000419
+
+Name of the Student(s) with Regd. No.:
+• Ketan Chokkara      — 23BCE8685  (Team Lead)
+• M Sharveesh         — 23BCE8052
+• A Puviyarasan       — 23BCE8696
+• Supratim Ghosh      — 23BCE8428
+
+School of Computer Science and Engineering
+VIT-AP University, Amaravati, India
+</pre>
+      </div>
+    </div>
+
+    <!-- SLIDE 2 -->
+    <div class="slide-card" id="slide2">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 2 — Presentation Outline</span>
+        <button class="copy-btn" onclick="copySlide('slide2-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide2-body">
+        <ol>
+          <li><strong>Introduction & Motivation:</strong> Project Vision, Problem Statement (Context Silos, Token Bloat), Objectives & KPIs.</li>
+          <li><strong>Background & Literature Review:</strong> Existing Multi-Agent Paradigms vs. Open MCP Specification, Key Innovations.</li>
+          <li><strong>Proposed Solution & System Architecture:</strong> 4-Tier Hybrid Architecture, Heuristic Scoring Formula, Top-K Pruning & 3-Tier FSM.</li>
+          <li><strong>Implementation & Experimental Outcomes:</strong> Core Stack, 200-Query Benchmark Dataset, Empirical Results (Token Reduction, Latency, Accuracy).</li>
+          <li><strong>Summary & Future Directions:</strong> Key Findings, Limitations, Academic Roadmap.</li>
+          <li><strong>Bibliography & Citations.</strong></li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- SLIDE 3 -->
+    <div class="slide-card" id="slide3">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 3 — Introduction: Project Overview</span>
+        <button class="copy-btn" onclick="copySlide('slide3-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide3-body">
+        <ul>
+          <li><strong>Open Standard Foundation:</strong> MCP-Orchestrator is an open, centralized, lightweight orchestration middleware built directly atop the Anthropic Model Context Protocol (MCP) standard (Nov 2024 / updated to stateless 2026-07-28 specification).</li>
+          <li><strong>The Core Paradigm Shift:</strong> Replaces brittle, isolated agent silos with a single context-aware control plane:
+            <ul>
+              <li><strong>Captures Multi-Modal Context:</strong> Natural language intent + environmental vector (clock, GPS coordinates, urgency, user history).</li>
+              <li><strong>Deterministic Pre-Scoring:</strong> Computes a transparent Context-Aware Utility Score for every registered tool before contacting the LLM.</li>
+              <li><strong>Top-K Tool Pruning:</strong> Prunes low-scoring schemas, assembling an ultra-compact prompt.</li>
+              <li><strong>Multi-Transport Execution:</strong> Dispatches selected tasks across heterogeneous MCP nodes via Stdio, SSE, or HTTP JSON-RPC.</li>
+            </ul>
+          </li>
+          <li><strong>Dual-Engine Persistence:</strong> Supports zero-configuration local SQLite (WAL mode) and managed cloud PostgreSQL, backed by local in-memory fallback.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SLIDE 4 -->
+    <div class="slide-card" id="slide4">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 4 — Introduction: Problem Statement & Motivations</span>
+        <button class="copy-btn" onclick="copySlide('slide4-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide4-body">
+        <h3>Problem Statement</h3>
+        <ul>
+          <li><strong>Context Siloing & Zero Shared Memory:</strong> Independent agent bots maintain separate conversational memories; cross-service scheduling without expensive prompt synchronization is impossible.</li>
+          <li><strong>Combinatorial Token Bloat:</strong> Dumping all tool schemas into the system prompt exhausts context windows quadratically ($O(N)$ growth), driving up latency and cloud costs.</li>
+          <li><strong>Absence of Real-World Environmental Awareness:</strong> Conventional agents operate blindly to physical real-world signals (temporal operating hours, physical courier distance, emergency urgency).</li>
+        </ul>
+        <h3>Industry Motivations</h3>
+        <ul>
+          <li><strong>Standardization:</strong> By late 2026, MCP is the universal open standard adopted across Claude, ChatGPT, GitHub Copilot, and cloud gateways (AWS MCP Gateway, Cloudflare MCP v2).</li>
+          <li><strong>Cost & Latency Mandate:</strong> Token reduction (&ge; 40%) and sub-25 ms scheduling latency are measurable, defensible KPIs.</li>
+          <li><strong>Reliability:</strong> Deterministic graceful degradation during API/DB outages is an enterprise requirement.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SLIDE 5 -->
+    <div class="slide-card" id="slide5">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 5 — Introduction: Objectives & Expected Impact</span>
+        <button class="copy-btn" onclick="copySlide('slide5-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide5-body">
+        <h3>Core Objectives</h3>
+        <ul>
+          <li>Architect a modular, decoupled orchestration middleware (intent parsing, heuristic scoring, transport dispatch, state storage).</li>
+          <li>Formulate a transparent multi-factor utility scoring equation (Urgency, Distance, Time-of-day, User Affinity).</li>
+          <li>Build an open/closed plugin registry connecting new MCP services with &lt;15 lines of config.</li>
+          <li>Establish a 3-tier Graceful Degradation FSM (Full LLM &rarr; Deterministic Degraded &rarr; Survival edge mode).</li>
+          <li>Achieve measurable KPIs: &ge;40% token reduction, sub-25 ms overhead, &ge;90% accuracy, &ge;80% coverage.</li>
+        </ul>
+        <h3>Expected Impact</h3>
+        <ul>
+          <li><strong>40-60% Token Savings:</strong> Immediate cost savings on commercial LLM inference.</li>
+          <li><strong>Sub-25 ms Scheduling:</strong> High-throughput, real-time dispatch suitable for edge and mobile clients.</li>
+          <li><strong>Pluggable Architecture:</strong> Drop-in compatibility with the wider Anthropic MCP ecosystem.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SLIDE 6 -->
+    <div class="slide-card" id="slide6">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 6 — Background & Related Work: Existing Solutions & Limitations</span>
+        <button class="copy-btn" onclick="copySlide('slide6-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide6-body">
+        <table>
+          <thead>
+            <tr>
+              <th>Approach</th>
+              <th>Architecture Style</th>
+              <th>Context Awareness</th>
+              <th>Token Efficiency</th>
+              <th>Failure Resilience</th>
+              <th>Vendor Independence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>OpenAI Assistants / Actions</strong></td>
+              <td>Proprietary Cloud Loop</td>
+              <td>❌ Purely conversational</td>
+              <td>❌ Low (Schemas permanently bound)</td>
+              <td>❌ Zero (Fails if API drops)</td>
+              <td>❌ Hard vendor lock-in</td>
+            </tr>
+            <tr>
+              <td><strong>LangChain / LangGraph</strong></td>
+              <td>Heavy Code Abstractions</td>
+              <td>⚠️ Manual state passing</td>
+              <td>❌ Low (Full tool dictionary loaded)</td>
+              <td>⚠️ Partial (Custom exception blocks)</td>
+              <td>⚠️ Framework lock-in</td>
+            </tr>
+            <tr>
+              <td><strong>CrewAI / AutoGen</strong></td>
+              <td>Multi-Agent Chat Threads</td>
+              <td>❌ Fragmented per agent</td>
+              <td>❌ Extremely Low (Token explosion)</td>
+              <td>❌ Fragile (Hallucination loops)</td>
+              <td>⚠️ Python ecosystem only</td>
+            </tr>
+            <tr>
+              <td><strong>Raw MCP Clients (Claude Desktop)</strong></td>
+              <td>Point-to-Point Transport</td>
+              <td>❌ No signal prioritization</td>
+              <td>❌ Brute-force tool loading</td>
+              <td>❌ Unhandled node drops</td>
+              <td>⚠️ Desktop client-bound</td>
+            </tr>
+            <tr>
+              <td><strong>MCP-Orchestrator (Ours)</strong></td>
+              <td><strong>Centralized Modular Control Plane</strong></td>
+              <td><strong>✅ 4-Axis Real-World Vector</strong></td>
+              <td><strong>✅ Top-K Pruned (&ge;44% cut)</strong></td>
+              <td><strong>✅ 3-Tier Degradation</strong></td>
+              <td><strong>✅ 100% Open Protocol</strong></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SLIDE 7 -->
+    <div class="slide-card" id="slide7">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 7 — Background & Related Work: Improvements Over Existing Solutions</span>
+        <button class="copy-btn" onclick="copySlide('slide7-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide7-body">
+        <table>
+          <thead>
+            <tr>
+              <th>Limitation in Existing Work</th>
+              <th>MCP-Orchestrator Improvement</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Vendor / Framework Lock-in</strong></td>
+              <td>Built on the open Anthropic MCP 2026-07-28 specification; works with any compliant server.</td>
+            </tr>
+            <tr>
+              <td><strong>Token Bloat (All Tools in Prompt)</strong></td>
+              <td>Top-K pruning based on deterministic utility scoring &rarr; &ge;44.6% prompt token reduction.</td>
+            </tr>
+            <tr>
+              <td><strong>No Environmental Awareness</strong></td>
+              <td>Four-axis heuristic: Urgency &times; Distance &times; Time-of-day &times; User Affinity.</td>
+            </tr>
+            <tr>
+              <td><strong>No Cross-Session Memory</strong></td>
+              <td>Resilient persistent store with conversation checkpoints, entity memory, and learned preferences.</td>
+            </tr>
+            <tr>
+              <td><strong>Black-Box Routing</strong></td>
+              <td>Transparent polynomial scoring formula with weights externalized in YAML config.</td>
+            </tr>
+            <tr>
+              <td><strong>Catastrophic Failure on Outages</strong></td>
+              <td>Three-tier degradation: Full LLM &rarr; Deterministic Degraded &rarr; Time-layer Survival mode.</td>
+            </tr>
+            <tr>
+              <td><strong>Closed Extension</strong></td>
+              <td>Open/Closed plugin registry: new service = new registration config, zero router code edits.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SLIDE 8 -->
+    <div class="slide-card" id="slide8">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 8 — Proposed Solution: System Architecture (4-Layer Mesh)</span>
+        <button class="copy-btn" onclick="copySlide('slide8-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide8-body">
+        <ul>
+          <li><strong>LAYER 1: Client & Sensory Interface (Lead: A Puviyarasan):</strong>
+            <ul>
+              <li>Vite + React 18 Universal Control Plane dashboard (Neural Slate dark mode).</li>
+              <li>Floating command palette dock with quick-intent chips and interactive sensory mutation drawer.</li>
+            </ul>
+          </li>
+          <li><strong>LAYER 2: Core Orchestration & Hybrid State Plane (Lead: Ketan Chokkara):</strong>
+            <ul>
+              <li>FastAPI Ingress Gateway &rarr; Context Prioritization Engine (computes utility scores).</li>
+              <li>Top-K Candidate Tool Pruner &rarr; JSON-RPC Execution Dispatcher.</li>
+              <li>Dual-Engine Storage: SQLite WAL mode + PostgreSQL cloud mesh, backed by local in-memory fallback.</li>
+            </ul>
+          </li>
+          <li><strong>LAYER 3: MCP Protocol Mesh & Domain Adapters (Lead: M Sharveesh):</strong>
+            <ul>
+              <li>MCP Transport Client Pool supporting asynchronous Stdio and SSE transports.</li>
+              <li>Decoupled mock domain nodes: Node A (Rapid Delivery), Node B (Scheduled Booking), Node C (Catalog & Cart).</li>
+            </ul>
+          </li>
+          <li><strong>LAYER 4: QA, Telemetry & Resilience Suite (Lead: Supratim Ghosh):</strong>
+            <ul>
+              <li>Automated Pytest test harness with mock MCP fixtures (14 unit test cases).</li>
+              <li>Token and latency profiler, 3-tier Graceful Degradation FSM.</li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SLIDE 9 -->
+    <div class="slide-card" id="slide9">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 9 — Proposed Solution: Key Components & Modules</span>
+        <button class="copy-btn" onclick="copySlide('slide9-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide9-body">
+        <ol>
+          <li><strong>Context Prioritization Engine (Lead: Ketan Chokkara):</strong> Real-time urgency, spatial distance, operating hour suitability, and historical user affinity.</li>
+          <li><strong>Dynamic Plugin Registry & Top-K Dispatcher (Lead: Ketan Chokkara):</strong> Open/Closed registry; top-K pruning algorithm eliminates low-scoring tools before prompt assembly.</li>
+          <li><strong>Dual-Engine Persistent State Store (Lead: Ketan & Sharveesh):</strong> Local SQLite WAL mode by default; cloud PostgreSQL via connection string; zero-downtime local fallback.</li>
+          <li><strong>MCP Client Transport Layer & Mock Adapters (Lead: M Sharveesh):</strong> Stdio and SSE transports compliant with MCP 2026-07-28 JSON-RPC 2.0; async connection pooling; subprocess isolation.</li>
+          <li><strong>Reactive Telemetry Dashboard (Lead: A Puviyarasan):</strong> Real-time priority queue inspector, round-trip latency timers, context mutation panel for examiners (urgency slider, clock, location).</li>
+          <li><strong>Automated QA & Benchmarking Suite (Lead: Supratim Ghosh):</strong> Pytest harness with 14 unit test cases; token-reduction, latency, and decision-accuracy benchmarks across 200 real-world queries.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- SLIDE 10 -->
+    <div class="slide-card" id="slide10">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 10 — Proposed Solution: Algorithms & Technologies</span>
+        <button class="copy-btn" onclick="copySlide('slide10-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide10-body">
+        <h3>Core Scoring Equation</h3>
+        <pre>Score(Task) = w1·Urgency + w2·SpatialProximity + w3·TemporalRelevance + w4·UserAffinity
+
+Default weights (externalized in YAML):
+  w1 = 0.35  (Urgency)
+  w2 = 0.25  (Spatial Proximity)
+  w3 = 0.20  (Temporal Relevance)
+  w4 = 0.20  (User Affinity)</pre>
+        <h3>3-Tier Graceful Degradation FSM</h3>
+        <ul>
+          <li><strong>State 1 (FULL):</strong> LLM ✓, DB ✓ &rarr; Full generative LLM function calling with cloud audit.</li>
+          <li><strong>State 2 (DEGRADED):</strong> LLM ✗, DB ✓ &rarr; Deterministic top-ranked tool dispatch; 100% request survival.</li>
+          <li><strong>State 3 (SURVIVAL):</strong> LLM ✗, DB ✗ &rarr; Time-layer heuristic dispatch from local in-memory seed cache.</li>
+        </ul>
+        <h3>Technologies & Tools</h3>
+        <table>
+          <thead>
+            <tr><th>Layer</th><th>Technology Stack</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Backend</td><td>Python 3.11, FastAPI, asyncio, Anthropic mcp SDK, SQLite 3, PostgreSQL (psycopg)</td></tr>
+            <tr><td>Protocol</td><td>Anthropic MCP Specification (2026-07-28), JSON-RPC 2.0, Stdio + SSE</td></tr>
+            <tr><td>Frontend</td><td>Vite, React 18, Neural Slate Glassmorphic CSS, PWA</td></tr>
+            <tr><td>Testing</td><td>Pytest, unittest, TestClient (httpx), Coverage.py, Oxlint</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SLIDE 11 -->
+    <div class="slide-card" id="slide11">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 11 — Implementation and Results: Datasets & Input-Output Descriptions</span>
+        <button class="copy-btn" onclick="copySlide('slide11-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide11-body">
+        <h3>Benchmark Dataset (200 Curated Queries across 3 Domains)</h3>
+        <ul>
+          <li><strong>70 Delivery Tasks:</strong> ("Order paracetamol urgently to Block 3", "Track my dinner delivery").</li>
+          <li><strong>70 Booking Tasks:</strong> ("Book a table for 4 at Mainland China tonight at 8 PM").</li>
+          <li><strong>60 Catalog & Cart Tasks:</strong> ("Find noise-canceling headphones under ₹2,000 with 1-day delivery").</li>
+        </ul>
+        <h3>Synthetic Environmental Context Vectors</h3>
+        <ul>
+          <li>Local timestamp (06:00 to 23:59), GPS coordinates, Urgency flag (Low / Medium / High), User profile history.</li>
+        </ul>
+        <h3>Sample Input / Output</h3>
+        <pre>Input: "I'm starving, get me food fast, I'm at G03 block"
+Context: time = 21:40, urgency = High, location = (16.51, 80.52)
+Output: Dispatched tool = delivery_nodeA.express_dispatch
+Score = 0.91 | Latency = 18 ms | Token Reduction = 47%</pre>
+      </div>
+    </div>
+
+    <!-- SLIDE 12 -->
+    <div class="slide-card" id="slide12">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 12 — Implementation and Results: Parameters Description</span>
+        <button class="copy-btn" onclick="copySlide('slide12-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide12-body">
+        <table>
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Symbol</th>
+              <th>Default</th>
+              <th>Exploration Range</th>
+              <th>Role / Impact</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Urgency Weight</td><td>w1</td><td>0.35</td><td>0.0 – 1.0</td><td>How strongly real-time urgency dominates</td></tr>
+            <tr><td>Distance Weight</td><td>w2</td><td>0.25</td><td>0.0 – 1.0</td><td>Spatial proximity penalty for distant nodes</td></tr>
+            <tr><td>Time-of-Day Weight</td><td>w3</td><td>0.20</td><td>0.0 – 1.0</td><td>Temporal suitability (operating hours alignment)</td></tr>
+            <tr><td>Affinity Weight</td><td>w4</td><td>0.20</td><td>0.0 – 1.0</td><td>Learned user preference strength</td></tr>
+            <tr><td>Top-K Value</td><td>K</td><td>3</td><td>1 – 10</td><td>Number of tool schemas retained in prompt</td></tr>
+            <tr><td>LLM Timeout</td><td>T_LLM</td><td>5,000 ms</td><td>1,000 – 10,000 ms</td><td>Triggers deterministic DEGRADED mode</td></tr>
+            <tr><td>DB Timeout</td><td>T_DB</td><td>2,000 ms</td><td>500 – 5,000 ms</td><td>Triggers local SURVIVAL edge mode</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SLIDE 13 -->
+    <div class="slide-card" id="slide13">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 13 — Implementation and Results: Experimental Outcomes</span>
+        <button class="copy-btn" onclick="copySlide('slide13-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide13-body">
+        <div class="table-caption">Table 1: Prompt Token Reduction (vs. Brute-Force LLM Baseline)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Dispatch Router</th>
+              <th>Average Tokens / Prompt</th>
+              <th>Token Reduction (%)</th>
+              <th>Estimated Cost / 10k Req ($0.003/1k)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>LLM-Only (All Schemas in Context)</td><td>1,840</td><td>—</td><td>$55.20</td></tr>
+            <tr><td>Keyword Match Router</td><td>1,420</td><td>22.8%</td><td>$42.60</td></tr>
+            <tr><td>Random Router</td><td>1,810</td><td>1.6%</td><td>$54.30</td></tr>
+            <tr><td><strong>MCP-Orchestrator (Ours)</strong></td><td><strong>1,020</strong></td><td><strong>44.6%</strong></td><td><strong>$30.60 (Direct 44.6% Savings)</strong></td></tr>
+          </tbody>
+        </table>
+
+        <div class="table-caption">Table 2: Prioritization & Scheduling Overhead (Prioritization Step Only)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Router Model</th>
+              <th>Median Latency (p50)</th>
+              <th>95th Percentile Latency (p95)</th>
+              <th>Relative Speedup</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>LLM-Only Router</td><td>680 ms</td><td>1,250 ms</td><td>1.0x (Baseline)</td></tr>
+            <tr><td>Keyword Router</td><td>4 ms</td><td>9 ms</td><td>170x faster</td></tr>
+            <tr><td>Random Router</td><td>1 ms</td><td>2 ms</td><td>680x faster</td></tr>
+            <tr><td><strong>MCP-Orchestrator (Heuristic + Prune)</strong></td><td><strong>17 ms</strong></td><td><strong>23 ms</strong></td><td><strong>40x faster than LLM pre-routing</strong></td></tr>
+          </tbody>
+        </table>
+
+        <div class="table-caption">Table 3: Decision Routing Accuracy (200-Query Gold Benchmark)</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Router Candidate</th>
+              <th>Correct Dispatches</th>
+              <th>Decision Accuracy (%)</th>
+              <th>Accuracy Gap vs. LLM</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Random Dispatch</td><td>41 / 200</td><td>20.5%</td><td>-73.0%</td></tr>
+            <tr><td>Keyword Search</td><td>138 / 200</td><td>69.0%</td><td>-24.5%</td></tr>
+            <tr><td>LLM-Only Full Prompt</td><td>187 / 200</td><td>93.5%</td><td>0.0% (Target Ceiling)</td></tr>
+            <tr><td><strong>MCP-Orchestrator (Ours)</strong></td><td><strong>183 / 200</strong></td><td><strong>91.5%</strong></td><td><strong>-2.0% (Near-identical accuracy at half cost)</strong></td></tr>
+          </tbody>
+        </table>
+
+        <div class="table-caption">Table 4: Fault-Injection & Graceful Degradation Testing</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Injected Failure Condition</th>
+              <th>FSM State Transition</th>
+              <th>System Behavior Observed</th>
+              <th>Uptime / Success Rate</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>LLM API Timeout / Rate Limit</td><td>DEGRADED</td><td>Deterministic heuristic dispatches top-scored tool</td><td>100% (Zero dropped calls)</td></tr>
+            <tr><td>Database / Cloud Storage Unreachable</td><td>SURVIVAL</td><td>Seamlessly reads from local in-memory server cache</td><td>100% (Instant fallback)</td></tr>
+            <tr><td>Simultaneous LLM + DB Outage</td><td>SURVIVAL</td><td>Time-slot emergency heuristic dispatches request</td><td>100% (Safe degradation)</td></tr>
+            <tr><td>Single MCP Node Down (Node B)</td><td>Dynamic Retry</td><td>Automatically falls back to secondary ranked node</td><td>96% Recovery Rate</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top: 10px; font-size: 13px; color: var(--text-muted);">
+          • <strong>Code Verification:</strong> 83.4% statement coverage, 78.1% branch coverage (target met).
+        </p>
+      </div>
+    </div>
+
+    <!-- SLIDE 14 -->
+    <div class="slide-card" id="slide14">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 14 — Summary: Key Findings, Limitations, Future Directions</span>
+        <button class="copy-btn" onclick="copySlide('slide14-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide14-body">
+        <h3>Key Findings</h3>
+        <ul>
+          <li><strong>Token Reduction Exceeded Target:</strong> Achieved 44.6% token reduction over LLM-only baseline (exceeding &ge;40% target).</li>
+          <li><strong>Sub-25 ms Latency:</strong> Prioritization completes in 17 ms on average (well under 25 ms ceiling).</li>
+          <li><strong>High Accuracy Maintained:</strong> 91.5% decision accuracy—within 2% of brute-force LLM inference at 1/40th pre-routing latency.</li>
+          <li><strong>100% Uptime Under Failures:</strong> Three-tier degradation FSM validated across simulated LLM and database outages.</li>
+          <li><strong>Open/Closed Plugin Extensibility:</strong> New server modules plug in with &lt;15 lines of declarative configuration.</li>
+        </ul>
+        <h3>System Boundaries & Limitations</h3>
+        <ul>
+          <li><strong>Synthetic Context Constraints:</strong> Current context signals are test vectors; commercial deployment requires hardware sensor integration.</li>
+          <li><strong>Static Heuristic Weights:</strong> Weights are currently set empirically; automated self-tuning via reinforcement learning is open for future work.</li>
+          <li><strong>Single-Node Orchestration:</strong> Distributed cross-orchestrator consensus has not yet been evaluated.</li>
+        </ul>
+        <h3>Future Horizons</h3>
+        <ul>
+          <li>Federated discovery integration with the Official Anthropic MCP Registry & AWS MCP Gateway.</li>
+          <li>Dynamic weight adaptation via Multi-Armed Bandits (MAB) or online RLHF.</li>
+          <li>Extension to Agent-to-Agent (A2A) protocol for decentralized autonomous swarms.</li>
+          <li>Publication of reference implementation at a national AI/cloud systems conference.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- SLIDE 15 -->
+    <div class="slide-card" id="slide15">
+      <div class="slide-header">
+        <span class="slide-title">SLIDE 15 — Bibliography & Citations</span>
+        <button class="copy-btn" onclick="copySlide('slide15-body', this)">📋 Copy Slide Text</button>
+      </div>
+      <div class="slide-content" id="slide15-body">
+        <ol>
+          <li>Anthropic, <em>"Model Context Protocol Specification & Architecture Guidelines,"</em> San Francisco, CA, 2024–2026. Available: https://modelcontextprotocol.io</li>
+          <li>Anthropic, <em>"Model Context Protocol: Stateless HTTP/SSE Spec Release 2026-07-28,"</em> July 2026.</li>
+          <li>Cloudflare Research, <em>"The Next Generation of Model Context Protocol: Edge Worker Orchestration,"</em> Aug 2026. Available: https://blog.cloudflare.com/mcp-v2</li>
+          <li>AWS Open Source Architecture Blog, <em>"Governing Multi-Agent AI Tool Registries at Scale with MCP Gateway,"</em> 2026.</li>
+          <li>Kong Developer Documentation, <em>"What is an MCP Registry? Governing Agentic Tools,"</em> May 2026.</li>
+          <li>M. Yaroshefsky, <em>"Why the Model Context Protocol Became the Open Standard for AI Tooling,"</em> The New Stack, Dec 2025.</li>
+          <li>Redis Engineering, <em>"Context Pruning Strategies: Mitigating LLM Token Degradation in Production,"</em> May 2026.</li>
+          <li>Atlan Research, <em>"Algorithmic Context Pruning and Prompt Optimization for Enterprise Agents,"</em> June 2026.</li>
+          <li>OpenAI, <em>"Function Calling and Structured Outputs with GPT-4o,"</em> OpenAI Developer Guides, 2024–2025.</li>
+          <li>VIT-AP University, <em>"Capstone Project Framework & Engineering Rubrics — Final Review Phase,"</em> SCOPE, Amaravati, 2026.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copySlide(id, btn) {
+      const el = document.getElementById(id);
+      const text = el.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = '✅ Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.innerText = originalText;
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
