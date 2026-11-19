@@ -9,6 +9,7 @@ export default function StatusPanel({
   onOpenHistory,
   onOpenTour,
   historyCount = 0,
+  backendStatus = 'checking',
   activeGoal = 'General Routing'
 }) {
   const [isMcpOpen, setIsMcpOpen] = useState(false);
@@ -44,7 +45,7 @@ export default function StatusPanel({
     const vals = Object.values(servers);
     if (vals.length === 0) return 'disconnected';
     if (vals.every(v => v === 'connected')) return 'connected';
-    if (vals.some(v => v === 'connected')) return 'pending';
+    if (vals.some(v => v === 'connected' || v === 'pending')) return 'pending';
     return 'disconnected';
   };
 
@@ -74,11 +75,9 @@ export default function StatusPanel({
 
       {/* Middle Context & Latency Ambient Badges */}
       <div className="header-center-ambient">
-        <div className="header-hud-ticker" title="Control plane health status">
-          <span className="telemetry-live-dot" />
-          <span className="hud-ticker-label">ROUTER ONLINE</span>
-          <span className="hud-ticker-div">&bull;</span>
-          <span className="hud-ticker-stat">14ms</span>
+        <div className="header-hud-ticker" title="FastAPI backend health status">
+          <span className={`status-dot ${backendStatus === 'online' ? 'connected' : backendStatus === 'checking' ? 'pending' : 'disconnected'}`} />
+          <span className="hud-ticker-label">API {backendStatus.toUpperCase()}</span>
         </div>
 
         <button
@@ -152,9 +151,7 @@ export default function StatusPanel({
                       <div className={`status-dot ${getStatusClass(status)}`} />
                       <div className="popover-server-meta">
                         <span className="popover-server-name">{name}</span>
-                        <span className="popover-server-sub">
-                          {status === 'connected' ? '12ms • 8 tools' : 'Unreachable'}
-                        </span>
+                        <span className="popover-server-sub">{getStatusString(status)}</span>
                       </div>
                       <span className={`popover-server-status ${getStatusClass(status)}`}>
                         {getStatusString(status)}

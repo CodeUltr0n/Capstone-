@@ -4,15 +4,7 @@ import { Brain, X, Plus, Trash2, Zap, Shield, Sparkles, Sliders } from 'lucide-r
 export default function ContextMemoryDrawer({
   isOpen,
   onClose,
-  contextState = {
-    activeGoals: ['Full-stack Orchestration', 'Database Queries'],
-    memorySlots: [
-      { key: 'Default Environment', value: 'Production Linux Cluster' },
-      { key: 'Preferred Output', value: 'Structured Markdown Tables' },
-      { key: 'Data Policy', value: 'Zero PII Retention' }
-    ],
-    urgencyWeight: 0.85
-  },
+  contextState = { activeGoals: [], memorySlots: [], urgencyWeight: 0.5 },
   onUpdateContext
 }) {
   const [newGoal, setNewGoal] = useState('');
@@ -89,15 +81,15 @@ export default function ContextMemoryDrawer({
         </div>
 
         <div className="settings-drawer-body">
-          {/* Token Overhead Callout */}
+          {/* Session Context Note */}
           <div className="context-efficiency-banner">
             <div className="efficiency-icon-wrap">
               <Zap size={16} color="var(--accent-primary)" />
             </div>
             <div>
-              <div className="efficiency-title">Zero Token Silo Overhead</div>
+              <div className="efficiency-title">Session-only context</div>
               <div className="efficiency-desc">
-                Context is scored client-side and persisted in orchestrator memory — 87% lower token usage than independent agent silos.
+                Active goals are saved in this browser and lightly influence matching tools. Memory notes stay in the browser and are not sent to MCP servers.
               </div>
             </div>
           </div>
@@ -106,12 +98,12 @@ export default function ContextMemoryDrawer({
           <div className="settings-section">
             <div className="settings-section-title">
               <Sliders size={12} style={{ display: 'inline', marginRight: '6px' }} />
-              Prioritization Weights
+              UI Preference
             </div>
 
             <div className="context-slider-group">
               <div className="context-slider-label">
-                <span>Urgency Bias</span>
+                <span>Urgency Bias (UI only)</span>
                 <span className="context-slider-val">{Math.round(urgency * 100)}%</span>
               </div>
               <input
@@ -124,22 +116,22 @@ export default function ContextMemoryDrawer({
                 className="context-range-slider"
               />
               <div className="context-slider-sub">
-                Higher values prioritize low-latency servers over deep analysis.
+                This slider is displayed in the UI and does not change backend routing.
               </div>
             </div>
 
             <div className="signals-preview-grid">
               <div className="signal-pill">
                 <span className="signal-dot live" />
-                <span>Time: Active Slot</span>
+                <span>Routing: Query and tool descriptions</span>
               </div>
               <div className="signal-pill">
                 <span className="signal-dot live" />
-                <span>Context Match: 94%</span>
+                <span>Goals: Used as a small routing tie-breaker</span>
               </div>
               <div className="signal-pill">
                 <span className="signal-dot live" />
-                <span>Memory Cache: Warm</span>
+                <span>Notes: Browser storage only</span>
               </div>
             </div>
           </div>
@@ -177,12 +169,12 @@ export default function ContextMemoryDrawer({
             </div>
           </div>
 
-          {/* Persistent Memory Buffer */}
+          {/* Session Notes */}
           <div className="settings-section">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
               <div className="settings-section-title" style={{ margin: 0 }}>
                 <Shield size={12} style={{ display: 'inline', marginRight: '6px' }} />
-                Persistent Context Memory
+                Session Memory Notes
               </div>
               {contextState.memorySlots?.length > 0 && (
                 <button onClick={handleClearMemory} className="text-link-btn" title="Clear all memory">
@@ -193,7 +185,7 @@ export default function ContextMemoryDrawer({
 
             <div className="memory-slots-list">
               {contextState.memorySlots?.length === 0 ? (
-                <div className="empty-substate">No memory slots saved. Context adapts dynamically.</div>
+                <div className="empty-substate">No session notes. Notes are cleared when this page reloads.</div>
               ) : (
                 contextState.memorySlots?.map((slot, idx) => (
                   <div key={idx} className="memory-slot-card">

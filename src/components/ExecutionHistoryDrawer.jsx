@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { History, X, CheckCircle2, ChevronRight, Server, Clock, Zap, RotateCcw, Trash2 } from 'lucide-react';
+import { History, X, CheckCircle2, XCircle, ChevronRight, Server, Clock, Zap, RotateCcw, Trash2 } from 'lucide-react';
 
 export default function ExecutionHistoryDrawer({
   isOpen,
@@ -16,6 +16,11 @@ export default function ExecutionHistoryDrawer({
     if (filter === 'ALL') return true;
     return item.server?.toLowerCase().includes(filter.toLowerCase());
   });
+  const succeeded = history.filter(item => item.status === 'success').length;
+  const successRate = history.length ? `${Math.round((succeeded / history.length) * 100)}%` : '—';
+  const averageLatency = history.length
+    ? `${Math.round(history.reduce((sum, item) => sum + (Number.parseInt(item.latency, 10) || 0), 0) / history.length)}ms`
+    : '—';
 
   return (
     <>
@@ -36,15 +41,15 @@ export default function ExecutionHistoryDrawer({
           <div className="history-stats-banner">
             <div className="history-stat-cell">
               <span className="stat-num">{history.length}</span>
-              <span className="stat-label">Tasks Routed</span>
+              <span className="stat-label">Tasks Logged</span>
             </div>
             <div className="history-stat-cell">
-              <span className="stat-num">98.4%</span>
+              <span className="stat-num">{successRate}</span>
               <span className="stat-label">Success Rate</span>
             </div>
             <div className="history-stat-cell">
-              <span className="stat-num">18ms</span>
-              <span className="stat-label">Avg Routing</span>
+              <span className="stat-num">{averageLatency}</span>
+              <span className="stat-label">Avg Duration</span>
             </div>
           </div>
 
@@ -91,8 +96,9 @@ export default function ExecutionHistoryDrawer({
                       <Server size={11} />
                       {item.server || 'Auto Router'}
                     </span>
-                    <span className="history-status-badge success">
-                      <CheckCircle2 size={11} /> 200 OK
+                    <span className={`history-status-badge ${item.status === 'success' ? 'success' : 'error'}`}>
+                      {item.status === 'success' ? <CheckCircle2 size={11} /> : <XCircle size={11} />}
+                      {item.status === 'success' ? 'Complete' : 'Failed'}
                     </span>
                   </div>
 
@@ -105,7 +111,7 @@ export default function ExecutionHistoryDrawer({
                       <Zap size={11} /> {item.latency || '24ms'}
                     </span>
                     <span className="meta-metric">
-                      Confidence: {item.confidence || '94%'}
+                      Match score: {item.confidence || '—'}
                     </span>
                     <span className="meta-time">
                       {item.timeAgo || 'Just now'}

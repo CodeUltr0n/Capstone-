@@ -923,10 +923,35 @@ body {
   border: 1px solid rgba(16, 185, 129, 0.22);
 }
 
+.tool-status-badge.error {
+  background: rgba(248, 113, 113, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.25);
+}
+
 .tool-execution-body {
   padding: 10px 12px;
   border-top: 1px solid var(--border-subtle);
   background: rgba(8, 8, 10, 0.6);
+}
+
+.tool-arguments-form {
+  display: grid;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.tool-arguments-form .config-input-group {
+  margin: 0;
+}
+
+.tool-arguments-error {
+  color: #f87171;
+  font-size: 11px;
 }
 
 .tool-payload-title {
@@ -2937,6 +2962,10 @@ body {
   font-size: 9px;
   font-weight: 700;
   color: var(--status-success);
+}
+
+.history-status-badge.error {
+  color: #f87171;
 }
 
 .history-query-text {
