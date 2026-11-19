@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Copy, Check, Terminal, ChevronDown, ChevronUp, Server, Zap, ThumbsUp, ThumbsDown } from 'lucide-react';
 import OrchestrationTimeline from './OrchestrationTimeline';
+import ToolArgumentsForm from './ToolArgumentsForm';
 
-export default function Message({ msg, _isLatestAgentMsg, _isThinking }) {
+export default function Message({ msg, onSubmitToolArguments, _isLatestAgentMsg, _isThinking }) {
   const [copied, setCopied] = useState(false);
   const [isToolResultOpen, setIsToolResultOpen] = useState(false);
   const [feedback, setFeedback] = useState(null);
@@ -68,12 +69,14 @@ export default function Message({ msg, _isLatestAgentMsg, _isThinking }) {
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="tool-status-badge success">200 OK</span>
+                    <span className={`tool-status-badge ${msg.toolExecution.status === 'error' ? 'error' : 'success'}`}>
+                      {msg.toolExecution.status === 'error' ? 'Failed' : 'Complete'}
+                    </span>
                     {isToolResultOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                   </div>
                 </div>
 
-                {isToolResultOpen && msg.toolExecution.result && (
+                {isToolResultOpen && msg.toolExecution.result && msg.toolExecution.showPayload !== false && (
                   <div className="tool-execution-body">
                     <div className="tool-payload-title">OUTPUT PAYLOAD:</div>
                     <pre className="tool-payload-pre">
@@ -84,6 +87,10 @@ export default function Message({ msg, _isLatestAgentMsg, _isThinking }) {
                   </div>
                 )}
               </div>
+            )}
+
+            {msg.toolExecution?.result?.required_arguments && (
+              <ToolArgumentsForm result={msg.toolExecution.result} onSubmit={onSubmitToolArguments} />
             )}
 
             {/* Render Markdown Content */}

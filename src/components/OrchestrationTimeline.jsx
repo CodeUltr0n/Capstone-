@@ -53,20 +53,7 @@ export default function OrchestrationTimeline({ activeServer, rankings, _query, 
   };
 
   const getReason = () => {
-    const s = activeServer?.toLowerCase() || '';
-    if (s.includes('data') || s.includes('sql') || s.includes('db')) {
-      return 'Relational database schema requested • Structured query intent • Low latency match';
-    }
-    if (s.includes('weather') || s.includes('geo')) {
-      return 'Real-time telemetry signal • Geocoding context • Active weather API endpoint';
-    }
-    if (s.includes('file') || s.includes('fs')) {
-      return 'Directory path syntax detected • Local file inspection goal • High file-read permission';
-    }
-    if (s.includes('git') || s.includes('repo')) {
-      return 'Version control query • Git repository context match • Active project branch';
-    }
-    return 'Context-aware intent classification • Highest priority weight match across registered servers';
+    return 'Query terms matched against discovered tool names and descriptions';
   };
 
   return (
@@ -130,15 +117,15 @@ export default function OrchestrationTimeline({ activeServer, rankings, _query, 
             <div className="timeline-signals-box">
               <div className="signal-item">
                 <CheckCircle2 size={11} className="signal-check" />
-                <span>Session Goals: Active alignment verified</span>
+                <span>Query matched against discovered tool names and descriptions</span>
               </div>
               <div className="signal-item">
                 <CheckCircle2 size={11} className="signal-check" />
-                <span>Urgency Score: 0.88 (Interactive priority)</span>
+                <span>Tool arguments checked against the MCP input schema</span>
               </div>
               <div className="signal-item">
                 <CheckCircle2 size={11} className="signal-check" />
-                <span>Persistent Memory: Retained without token leak</span>
+                <span>Active goals add a small tool-ranking boost; memory notes stay local</span>
               </div>
             </div>
           )}
@@ -165,7 +152,7 @@ export default function OrchestrationTimeline({ activeServer, rankings, _query, 
             <div className="routing-container">
               <div className="routing-subhead">
                 <Server size={12} />
-                <span>SERVER CONFIDENCE SCORES</span>
+                <span>SERVER TOOL MATCH SCORES</span>
               </div>
 
               <div className="routing-servers-list">
@@ -213,10 +200,10 @@ export default function OrchestrationTimeline({ activeServer, rankings, _query, 
             <div className="execution-confirmation">
               <ChevronRight size={14} className="exec-icon" />
               <span>
-                Executing <strong>{formatServerName(activeServer)}</strong>
+                {toolExecution?.status === 'success' ? 'Executed' : toolExecution ? 'Tool call failed or needs input:' : 'No tool executed on'} <strong>{formatServerName(activeServer)}</strong>
                 {toolExecution?.tool ? ` &rarr; \`${toolExecution.tool}\`` : ''}
               </span>
-              <span className="exec-latency">18ms</span>
+              <span className="exec-latency">{toolExecution?.duration || '—'}</span>
             </div>
           )}
         </div>

@@ -9,16 +9,7 @@ import SettingsDrawer from './components/SettingsDrawer';
 import ContextMemoryDrawer from './components/ContextMemoryDrawer';
 import ExecutionHistoryDrawer from './components/ExecutionHistoryDrawer';
 import Toast from './components/Toast';
-import { supabase } from './lib/supabase';
-
-// ──── Initial Seed Data ────
-const INITIAL_SERVERS = {
-  'PostgreSQL MCP': 'connected',
-  'Local Filesystem': 'connected',
-  'Weather API': 'connected',
-  'GitHub MCP': 'connected',
-  'Brave Search': 'pending',
-};
+import { api, formatHistoryItem } from './lib/api';
 
 const QUICK_INTENT_CHIPS = [
   { label: '🗄️ Query Orders', query: 'Query the database for the top 5 highest-value orders this week and calculate revenue.' },
@@ -27,24 +18,6 @@ const QUICK_INTENT_CHIPS = [
   { label: '⚡ Priority Test', query: 'Benchmark orchestration latency across database, filesystem, and external weather MCP servers.' },
 ];
 
-const INITIAL_HISTORY = [
-  {
-    id: 1,
-    query: 'Inspect repository configuration and list production scripts',
-    server: 'Local Filesystem',
-    latency: '18ms',
-    confidence: '97%',
-    timeAgo: '10 mins ago'
-  },
-  {
-    id: 2,
-    query: 'Query active database connection pool status',
-    server: 'PostgreSQL MCP',
-    latency: '14ms',
-    confidence: '95%',
-    timeAgo: '25 mins ago'
-  }
-];
 
 export default function App() {
   const [isLaunched, setIsLaunched] = useState(false);
@@ -77,7 +50,8 @@ export default function App() {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [serverDetails, setServerDetails] = useState([]);
-  const [serversLoading, setServersLoading] = useState(!!supabase);
+  const [serversLoading, setServersLoading] = useState(true);
+  const [backendStatus, setBackendStatus] = useState('checking');
   const [activeTab, setActiveTab] = useState('chat');
   const [toast, setToast] = useState(null);
 
@@ -86,7 +60,7 @@ export default function App() {
     if (serverDetails.length > 0) {
       return Object.fromEntries(serverDetails.map(s => [s.name, s.status]));
     }
-    return INITIAL_SERVERS;
+    return {};
   }, [serverDetails]);
 
   // Modals & Drawers state
@@ -96,24 +70,21 @@ export default function App() {
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
 
   // Context & Execution History state
-  const [contextState, setContextState] = useState({
-    activeGoals: ['Full-stack App Development', 'Database Queries'],
-    memorySlots: [
-      { key: 'Default Environment', value: 'Production Linux Cluster' },
-      { key: 'Preferred Output', value: 'Structured Markdown Tables' },
-      { key: 'Data Policy', value: 'Zero PII Retention' }
-    ],
-    urgencyWeight: 0.85
+  const [contextState, setContextState] = useState(() => {
+    try {
+      const saved = localStorage.getItem('mcp_orchestrator_context');
+      if (saved) return JSON.parse(saved);
+    } catch {
+      // Ignore malformed or unavailable browser storage.
+    }
+    return { activeGoals: [], memorySlots: [], urgencyWeight: 0.5 };
   });
-  const [executionHistory, setExecutionHistory] = useState(INITIAL_HISTORY);
+  const [executionHistory, setExecutionHistory] = useState([]);
 
   // Settings
   const [settings, setSettings] = useState({
     showControlPlane: true,
-    autoRoute: true,
-    persistentMemory: true,
     showToolPayloads: true,
-    streamResponses: false,
   });
 
   const messagesListRef = useRef(null);
@@ -131,127 +102,78 @@ export default function App() {
     scrollToBottom();
   }, [messages, isLoading]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('mcp_orchestrator_context', JSON.stringify(contextState));
+    } catch {
+      // Context remains usable for the current page session if storage is unavailable.
+    }
+  }, [contextState]);
+
   // Helper to show a toast notification
   const showToast = useCallback((message, type = 'error') => {
     setToast({ message, type });
   }, []);
 
   useEffect(() => {
-    if (!supabase) return;
-
-    const loadServers = async () => {
+    const loadData = async () => {
       setServersLoading(true);
       try {
-        const { data, error } = await supabase
-          .from('mcp_servers')
-          .select('id, name, url, transport, status, last_latency_ms');
-
-        if (error) {
-          console.error('Failed to load MCP servers:', error);
-          setServerDetails([]);
-          showToast('Failed to load servers from database');
-          return;
-        }
-
-        if (!data?.length) {
-          console.warn('No MCP servers found in Supabase, using fallback data.');
-          setServerDetails([]);
-          return;
-        }
-
-        setServerDetails(data);
-      } catch (err) {
-        console.error('Supabase request threw:', err);
-        setServerDetails([]);
-        showToast('Connection to database failed');
+        const [health, serverRows, historyRows] = await Promise.all([api.health(), api.listServers(), api.listHistory()]);
+        setBackendStatus(health.status === 'ok' ? 'online' : 'offline');
+        setServerDetails(serverRows);
+        setExecutionHistory(historyRows.map(formatHistoryItem));
+      } catch (error) {
+        setBackendStatus('offline');
+        console.error('Unable to load orchestrator data.', error);
+        showToast('Backend unavailable. Start the FastAPI service to load servers and history.');
       } finally {
         setServersLoading(false);
       }
     };
-
-    loadServers();
+    loadData();
   }, [showToast]);
 
   const handleAddServer = async (server) => {
-    if (!supabase) return { success: false };
-
-    // Check for duplicate name
-    if (serverDetails.some(s => s.name.toLowerCase() === server.name.toLowerCase())) {
-      showToast(`Server "${server.name}" already exists`);
+    try {
+      const saved = await api.addServer({ name: server.name, url: server.url, transport: server.transport });
+      setServerDetails(prev => [...prev, saved]);
+      showToast('Server added. Ping it to verify the MCP connection.', 'success');
+      return { success: true };
+    } catch (error) {
+      showToast(error.message);
       return { success: false };
     }
+  };
 
-    const { data, error } = await supabase
-      .from('mcp_servers')
-      .insert({
-        name: server.name,
-        url: server.url,
-        transport: server.transport,
-        status: server.status,
-        last_latency_ms: parseInt(server.latency, 10) || null,
-      })
-      .select('id, name, url, transport, status, last_latency_ms')
-      .single();
+  const handleDeleteServer = async (server) => {
+    try {
+      await api.deleteServer(server.id);
+      setServerDetails(prev => prev.filter(item => item.id !== server.id));
+      showToast('Server removed', 'success');
+      return { success: true };
+    } catch (error) {
+      showToast(error.message);
+      return { success: false };
+    }
+  };
 
-    if (error) {
-      // Handle unique constraint violation
-      if (error.code === '23505') {
-        showToast(`Server "${server.name}" already exists`);
+  const handlePingServer = async (server) => {
+    try {
+      const result = await api.pingServer(server.id);
+      setServerDetails(prev => prev.map(item => item.id === server.id
+        ? { ...item, status: result.status, last_latency_ms: result.latency_ms }
+        : item));
+      if (result.status === 'connected') {
+        showToast(`MCP handshake complete: ${result.tools_count} tools in ${result.latency_ms}ms`, 'success');
       } else {
-        console.error('Unable to add MCP server:', error);
-        showToast('Failed to save server to database');
+        showToast(result.error || 'MCP server is unreachable');
       }
-      return { success: false };
+      return result;
+    } catch (error) {
+      showToast(error.message);
+      return { status: 'error', error: error.message };
     }
-
-    setServerDetails(prev => [...prev, data]);
-    showToast('Server added successfully', 'success');
-    return { success: true };
-  };
-
-  const handleDeleteServer = async (serverToDelete) => {
-    if (!supabase) return { success: false };
-
-    // If server has an id from Supabase, delete by id; otherwise by name
-    const query = serverToDelete.id
-      ? supabase.from('mcp_servers').delete().eq('id', serverToDelete.id)
-      : supabase.from('mcp_servers').delete().eq('name', serverToDelete.name);
-
-    const { error } = await query;
-
-    if (error) {
-      console.error('Unable to delete MCP server:', error);
-      showToast('Failed to remove server from database');
-      return { success: false };
-    }
-
-    setServerDetails(prev => prev.filter(s =>
-      serverToDelete.id ? s.id !== serverToDelete.id : s.name !== serverToDelete.name
-    ));
-    showToast('Server removed', 'success');
-    return { success: true };
-  };
-
-  const handleUpdateServer = async (serverToUpdate, updates) => {
-    if (!supabase) return { success: false };
-
-    const query = serverToUpdate.id
-      ? supabase.from('mcp_servers').update(updates).eq('id', serverToUpdate.id)
-      : supabase.from('mcp_servers').update(updates).eq('name', serverToUpdate.name);
-
-    const { error } = await query.select('id, name, url, transport, status, last_latency_ms').single();
-
-    if (error) {
-      console.error('Unable to update MCP server:', error);
-      showToast('Failed to update server in database');
-      return { success: false };
-    }
-
-    setServerDetails(prev => prev.map(s => {
-      const match = serverToUpdate.id ? s.id === serverToUpdate.id : s.name === serverToUpdate.name;
-      return match ? { ...s, ...updates } : s;
-    }));
-    return { success: true };
   };
 
   // Handle BottomNav tab switching
@@ -276,224 +198,57 @@ export default function App() {
     }
   };
 
-  // Dynamic Intent & Routing Generator for realistic interactive experience
-  const generateSimulatedResponse = (query) => {
-    const q = query.toLowerCase();
-    const getRegisteredServerName = (expectedName) => {
-      const searchName = expectedName.replace(/\s*MCP$/i, '').toLowerCase();
-      return Object.keys(servers).find(name => name.toLowerCase().includes(searchName)) || expectedName;
-    };
-    const databaseServer = getRegisteredServerName('PostgreSQL MCP');
-    const filesystemServer = getRegisteredServerName('Local Filesystem');
-    const weatherServer = getRegisteredServerName('Weather API');
-    const githubServer = getRegisteredServerName('GitHub MCP');
-    const braveServer = getRegisteredServerName('Brave Search');
-
-    // 1. Database Intent
-    if (q.includes('data') || q.includes('sql') || q.includes('order') || q.includes('table') || q.includes('revenue') || q.includes('db')) {
-      return {
-        server: databaseServer,
-        rankings: [
-          [databaseServer, 1.94],
-          [filesystemServer, 0.58],
-          [weatherServer, 0.22]
-        ],
-        tool: {
-          tool: 'postgres.query_read_only',
-          duration: '22ms',
-          result: {
-            status: 'success',
-            rows_returned: 4,
-            execution_time: '0.0021s',
-            columns: ['order_id', 'client', 'amount_usd', 'status'],
-            data: [
-              ['#9401', 'Acme Corp', '$14,250.00', 'COMPLETED'],
-              ['#9402', 'Starlight Labs', '$8,920.00', 'COMPLETED'],
-              ['#9403', 'Nordic Systems', '$6,450.00', 'PROCESSING'],
-              ['#9404', 'Vertex AI', '$19,800.00', 'COMPLETED']
-            ]
-          }
-        },
-        content: [
-          '### Database Query Execution',
-          '',
-          `The Prioritization Engine identified **relational database query intent** and routed this request directly to the **${databaseServer}** server with a **97% confidence score**.`,
-          '',
-          '#### Order Summary',
-          '',
-          '| Order ID | Client | Amount (USD) | Status |',
-          '| :--- | :--- | :--- | :--- |',
-          '| **#9404** | Vertex AI | **$19,800.00** | Completed |',
-          '| **#9401** | Acme Corp | **$14,250.00** | Completed |',
-          '| **#9402** | Starlight Labs | **$8,920.00** | Completed |',
-          '| **#9403** | Nordic Systems | **$6,450.00** | Processing |',
-          '',
-          '> **Aggregated Revenue:** **$49,420.00** across 4 transaction records.',
-          '',
-          '*Zero token overhead was spent on filesystem or weather tools.*'
-        ].join('\n')
-      };
-    }
-
-    // 2. Weather Intent
-    if (q.includes('weather') || q.includes('temp') || q.includes('rain') || q.includes('climate') || q.includes('wind') || q.includes('forecast') || q.includes('tokyo')) {
-      return {
-        server: weatherServer,
-        rankings: [
-          [weatherServer, 1.96],
-          [braveServer, 0.74],
-          [databaseServer, 0.25]
-        ],
-        tool: {
-          tool: 'weather.get_current_and_forecast',
-          duration: '31ms',
-          result: {
-            locations: [
-              { city: 'Tokyo, JP', temp_c: 19.4, condition: 'Clear', humidity: '52%', wind_kmh: 12 },
-              { city: 'New York, US', temp_c: 14.8, condition: 'Partly Cloudy', humidity: '64%', wind_kmh: 18 }
-            ]
-          }
-        },
-        content: [
-          `### Telemetry Dispatch: ${weatherServer}`,
-          '',
-          `Context evaluation prioritized **real-time meteorological telemetry** over internal data stores. Selected **${weatherServer}** with **98% confidence**.`,
-          '',
-          '#### Current Environmental Conditions',
-          '',
-          '- **Tokyo, Japan**: **19.4°C** • Clear skies • 52% Humidity • Wind: 12 km/h NE',
-          '- **New York, USA**: **14.8°C** • Partly Cloudy • 64% Humidity • Wind: 18 km/h W',
-          '',
-          'Both endpoints responded in under **32ms** via HTTP SSE streaming.'
-        ].join('\n')
-      };
-    }
-
-    // 3. Filesystem / Code Intent
-    if (q.includes('file') || q.includes('dir') || q.includes('folder') || q.includes('package') || q.includes('repo') || q.includes('inspect') || q.includes('git')) {
-      return {
-        server: filesystemServer,
-        rankings: [
-          [filesystemServer, 1.91],
-          [githubServer, 1.34],
-          [databaseServer, 0.42]
-        ],
-        tool: {
-          tool: 'filesystem.read_file',
-          duration: '16ms',
-          result: {
-            filepath: '/Users/chokkaraketankumar/Desktop/Capstone/package.json',
-            bytes: 523,
-            dependencies: {
-              'lucide-react': '^1.52.0',
-              'react': '^19.2.8',
-              'react-dom': '^19.2.8',
-              'react-markdown': '^10.1.0'
-            }
-          }
-        },
-        content: [
-          `### Workspace Inspection: ${filesystemServer}`,
-          '',
-          `Routed directly to **${filesystemServer}** (transport: \`stdio\`). Identified target configuration file and extracted root dependencies:`,
-          '',
-          '```json',
-          '{',
-          '  "dependencies": {',
-          '    "lucide-react": "^1.52.0",',
-          '    "react": "^19.2.8",',
-          '    "react-dom": "^19.2.8",',
-          '    "react-markdown": "^10.1.0"',
-          '  },',
-          '  "devDependencies": {',
-          '    "@vitejs/plugin-react": "^6.1.1",',
-          '    "vite": "^8.3.0"',
-          '  }',
-          '}',
-          '```',
-          '',
-          'All modules are verified and compiled. Zero unnecessary agent loops required.'
-        ].join('\n')
-      };
-    }
-
-    // 4. Multi-Server Benchmark / General Fallback
-    return {
-      server: databaseServer,
-      rankings: [
-        [databaseServer, 1.82],
-        [filesystemServer, 1.45],
-        [weatherServer, 0.88],
-        [githubServer, 0.72]
-      ],
-      tool: {
-        tool: 'orchestrator.benchmark_dispatch',
-        duration: '28ms',
-        result: {
-          total_servers_polled: 4,
-          avg_latency: '18.4ms',
-          silo_token_savings: '86.2%',
-          active_memory_slots_used: 3
-        }
-      },
-      content: [
-        '### Prioritized Multi-Server Task Complete',
-        '',
-        `Your query was evaluated across all **${Object.keys(servers).length} registered MCP servers** using the **Context-Aware Prioritization Engine**:`,
-        '',
-        '1. **Intent Scoring:** Query matched high-priority domain intent',
-        `2. **Context Weighing:** Factored in session goals: \`${contextState.activeGoals.join(', ')}\``,
-        '3. **Optimal Route:** Selected primary server with zero token loss',
-        '4. **Memory Retention:** Stored key metrics in session buffer',
-        '',
-        '> The orchestrator operates as a single unified control plane — you get seamless multi-server capabilities without managing multiple agents.'
-      ].join('\n')
-    };
-  };
-
-  const handleSend = (text) => {
+  const handleSend = async (text, requestOptions = {}) => {
     const msgText = typeof text === 'string' ? text : inputValue;
     if (!msgText.trim() || isLoading) return;
 
     const trimmed = msgText.trim();
-
-    // Add user message
-    setMessages(prev => [...prev, { role: 'user', content: trimmed }]);
+    if (!requestOptions.retry) {
+      setMessages(prev => [...prev, { role: 'user', content: trimmed }]);
+    }
     setInputValue('');
     setIsLoading(true);
 
-    // Simulate orchestrated execution
-    setTimeout(() => {
-      const generated = generateSimulatedResponse(trimmed);
-
-      // Record to execution history
-      const newHistoryItem = {
-        id: Date.now(),
-        query: trimmed,
-        server: generated.server,
-        latency: generated.tool?.duration || '24ms',
-        confidence: '96%',
-        timeAgo: 'Just now'
-      };
-      setExecutionHistory(prev => [newHistoryItem, ...prev]);
-
-      setMessages(prev => [
-        ...prev,
-        {
-          role: 'agent',
-          content: generated.content,
-          orchestration: settings.showControlPlane ? {
-            activeServer: generated.server,
-            rankings: generated.rankings,
-            query: trimmed,
-          } : null,
-          toolExecution: settings.showToolPayloads ? generated.tool : null,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-
+    try {
+      const chatOptions = { ...requestOptions };
+      delete chatOptions.retry;
+      chatOptions.context_goals = contextState.activeGoals || [];
+      const result = await api.chat(trimmed, chatOptions);
+      setBackendStatus('online');
+      setMessages(prev => [...prev, {
+        role: 'agent',
+        content: result.content,
+        orchestration: settings.showControlPlane && result.server !== 'No server' ? {
+          activeServer: result.server,
+          rankings: result.rankings,
+          query: trimmed,
+        } : null,
+        toolExecution: result.tool ? {
+          ...result.tool,
+          server_id: result.server_id,
+          query: trimmed,
+          showPayload: settings.showToolPayloads,
+        } : null,
+        status: result.status,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+      try {
+        const historyRows = await api.listHistory();
+        setExecutionHistory(historyRows.map(formatHistoryItem));
+      } catch (error) {
+        console.error('Unable to refresh execution history.', error);
+      }
+    } catch (error) {
+      setBackendStatus('offline');
+      setMessages(prev => [...prev, {
+        role: 'agent',
+        content: `### Backend unavailable\n\n${error.message}\n\nStart the API with \`cd backend && uvicorn app:app --reload --port 8000\`.`,
+        status: 'error',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }]);
+    } finally {
       setIsLoading(false);
-    }, 1400);
+    }
   };
 
   const handleKeyDown = (e) => {
@@ -515,10 +270,7 @@ export default function App() {
   const handleResetSettings = () => {
     setSettings({
       showControlPlane: true,
-      autoRoute: true,
-      persistentMemory: true,
       showToolPayloads: true,
-      streamResponses: false,
     });
   };
 
@@ -539,7 +291,7 @@ export default function App() {
             <div className="onboarding-top-actions">
               <div className="onboarding-status-pill">
                 <span className="onboarding-live-dot" />
-                <span>5 NODES READY</span>
+                <span>{Object.values(servers).filter(status => status === 'connected').length} NODES ONLINE</span>
               </div>
               <button
                 type="button"
@@ -557,7 +309,7 @@ export default function App() {
           <div className="onboarding-hero-text">
             <h1 className="studio-onboarding-title">Universal Control Plane</h1>
             <p className="studio-onboarding-desc">
-              Autonomous orchestration layer sitting across distributed Model Context Protocol servers. Prioritizes real-world tasks using context signals with zero token silos.
+              FastAPI orchestration layer that discovers tools across your registered Model Context Protocol servers and routes requests to real MCP tools.
             </p>
           </div>
 
@@ -572,7 +324,7 @@ export default function App() {
               </div>
               <h3 className="pillar-title">Dynamic Prioritizer</h3>
               <p className="pillar-desc">
-                Context-aware signal weighting & urgency scoring across concurrent MCP tools.
+                Query and tool-description matching to select a relevant MCP tool.
               </p>
             </div>
 
@@ -585,7 +337,7 @@ export default function App() {
               </div>
               <h3 className="pillar-title">Multi-Server Fabric</h3>
               <p className="pillar-desc">
-                Hot-pluggable stdio & SSE servers with automatic fallback and failover.
+                Register servers over STDIO, SSE, and Streamable HTTP, then ping to verify their MCP handshake.
               </p>
             </div>
 
@@ -596,9 +348,9 @@ export default function App() {
                 </div>
                 <span className="pillar-tag">// 03 • CONTEXT</span>
               </div>
-              <h3 className="pillar-title">Zero-Silo Memory</h3>
+              <h3 className="pillar-title">Session Context</h3>
               <p className="pillar-desc">
-                Unified working memory slots that persist intentions across independent agents.
+                Session goals and memory notes are available in the control panel.
               </p>
             </div>
           </div>
@@ -613,19 +365,19 @@ export default function App() {
               </div>
               <div className="terminal-box-title">
                 <Terminal size={11} />
-                <span>gateway-handshake.log</span>
+                <span>backend-health.log</span>
               </div>
-              <span className="terminal-latency-badge">⚡ 12ms</span>
+              <span className="terminal-latency-badge">API {backendStatus}</span>
             </div>
             <div className="terminal-code-body">
               <div className="terminal-line">
-                <span className="t-dim">[00:01.04]</span> <span className="t-accent">gateway.init()</span> &rarr; <span className="t-success">5/5 MCP transports connected</span>
+                <span className="t-dim">[00:01.04]</span> <span className="t-accent">api.health()</span> &rarr; <span className={backendStatus === 'online' ? 't-success' : 't-dim'}>{backendStatus}</span>
               </div>
               <div className="terminal-line">
-                <span className="t-dim">[00:01.12]</span> <span className="t-accent">intent.evaluator:</span> auto_route=active, zero_silo=enabled
+                <span className="t-dim">[00:01.12]</span> <span className="t-accent">server.registry:</span> {Object.keys(servers).length} registered MCP servers
               </div>
               <div className="terminal-line">
-                <span className="t-dim">[00:01.18]</span> ready for prompt dispatch &bull; <span className="t-success">0 token silos detected</span>
+                <span className="t-dim">[00:01.18]</span> {backendStatus === 'online' ? 'ready for prompt dispatch' : 'start the FastAPI service to dispatch prompts'}
               </div>
             </div>
           </div>
@@ -660,6 +412,7 @@ export default function App() {
         onOpenHistory={() => setIsHistoryDrawerOpen(true)}
         onOpenTour={() => setIsLaunched(false)}
         historyCount={executionHistory.length}
+        backendStatus={backendStatus}
         activeGoal={contextState.activeGoals?.[0] || 'Universal Routing'}
       />
 
@@ -679,7 +432,7 @@ export default function App() {
                 </div>
                 <h1 className="bento-hero-title">Where should we orchestrate?</h1>
                 <p className="bento-hero-sub">
-                  Ask any question or dispatch tasks. The prioritization engine scores intent and routes to your registered MCP servers with zero token overhead.
+                  Ask a task. The backend matches it against discovered MCP tools and reports the result of the selected tool call.
                 </p>
               </div>
             )}
@@ -689,6 +442,12 @@ export default function App() {
               <Message
                 key={idx}
                 msg={msg}
+                onSubmitToolArguments={(arguments_) => handleSend(msg.toolExecution?.query, {
+                  retry: true,
+                  server_id: msg.toolExecution?.server_id,
+                  tool_name: msg.toolExecution?.tool,
+                  arguments: arguments_,
+                })}
                 isLatestAgentMsg={msg.role === 'agent' && idx === messages.length - 1}
                 isThinking={isLoading && idx === messages.length - 1}
               />
@@ -761,13 +520,10 @@ export default function App() {
         <div className="dock-telemetry-bar">
           <div className="dock-telemetry-left">
             <span className="telemetry-live-dot" />
-            <span>{Object.keys(servers).length} MCP NODES CONNECTED</span>
+            <span>{Object.values(servers).filter(status => status === 'connected').length}/{Object.keys(servers).length} MCP NODES ONLINE</span>
           </div>
           <div className="dock-telemetry-item">
-            <span>LATENCY: <strong>14MS</strong></span>
-          </div>
-          <div className="dock-telemetry-item">
-            <span>TOKEN SAVINGS: <strong>86.2%</strong></span>
+            <span>BACKEND: <strong>{backendStatus.toUpperCase()}</strong></span>
           </div>
         </div>
 
@@ -798,7 +554,10 @@ export default function App() {
         }}
         history={executionHistory}
         onSelectQuery={(q) => handleSend(q)}
-        onClearHistory={() => setExecutionHistory([])}
+        onClearHistory={async () => {
+          try { await api.clearHistory(); setExecutionHistory([]); }
+          catch (error) { showToast(error.message); }
+        }}
       />
 
       {/* Server Config Modal */}
@@ -813,7 +572,7 @@ export default function App() {
         serversLoading={serversLoading}
         onAddServer={handleAddServer}
         onDeleteServer={handleDeleteServer}
-        onUpdateServer={handleUpdateServer}
+        onPingServer={handlePingServer}
       />
 
       {/* Toast Notifications */}

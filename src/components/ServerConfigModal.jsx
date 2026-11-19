@@ -3,7 +3,7 @@ import { Server, Plus, Trash2, X, Zap, CheckCircle2, RefreshCw, Loader2 } from '
 
 const PRESET_SERVERS = [
   { name: 'PostgreSQL MCP', url: 'http://localhost:8001/mcp', transport: 'SSE' },
-  { name: 'Local Filesystem', url: 'stdio: npx @modelcontextprotocol/server-filesystem', transport: 'STDIO' },
+  { name: 'Local Filesystem', url: 'stdio: npx -y @modelcontextprotocol/server-filesystem .', transport: 'STDIO' },
   { name: 'Weather API', url: 'http://localhost:8002/mcp', transport: 'SSE' },
   { name: 'GitHub MCP', url: 'http://localhost:8003/mcp', transport: 'SSE' },
   { name: 'Brave Search', url: 'http://localhost:8004/mcp', transport: 'HTTP' }
@@ -17,9 +17,9 @@ export default function ServerConfigModal({
   serversLoading = false,
   onAddServer,
   onDeleteServer,
-  onUpdateServer,
+  onPingServer,
 }) {
-  // Build the display list from serverDetails (Supabase) or fallback from servers prop
+  // Build the display list from the backend registry, with a status-only fallback.
   const serverList = useMemo(() => {
     if (serverDetails.length > 0) {
       return serverDetails.map(server => ({
@@ -27,12 +27,10 @@ export default function ServerConfigModal({
         latency: server.last_latency_ms ? `${server.last_latency_ms}ms` : null,
       }));
     }
-    return Object.entries(servers).map(([name, status], idx) => ({
+    return Object.entries(servers).map(([name, status]) => ({
       name,
-      url: name.toLowerCase().includes('file') ? 'stdio: npx @mcp/filesystem' : `http://localhost:${8001 + idx}/mcp`,
-      status: status || 'connected',
-      transport: name.toLowerCase().includes('file') ? 'STDIO' : 'SSE',
-      latency: status === 'connected' ? '14ms' : null,
+      status,
+      transport: 'HTTP',
     }));
   }, [serverDetails, servers]);
 
@@ -53,8 +51,7 @@ export default function ServerConfigModal({
       name: newName.trim(),
       url: newUrl.trim() || 'http://localhost:8080/mcp',
       transport: newTransport,
-      status: 'connected',
-      latency: '14ms',
+      status: 'pending',
     };
 
     setAddingServer(true);
@@ -73,8 +70,7 @@ export default function ServerConfigModal({
 
     const server = {
       ...preset,
-      status: 'connected',
-      latency: '12ms',
+      status: 'pending',
     };
 
     await onAddServer?.(server);
@@ -89,17 +85,13 @@ export default function ServerConfigModal({
     setDeletingIndex(null);
   };
 
-  const handlePingServer = (idx) => {
+  const handlePingServer = async (idx) => {
     setPingingIndex(idx);
-    setTimeout(() => {
-      const newLatency = Math.floor(10 + Math.random() * 12);
-      const server = serverList[idx];
-      onUpdateServer?.(server, {
-        status: 'connected',
-        last_latency_ms: newLatency,
-      });
+    try {
+      await onPingServer?.(serverList[idx]);
+    } finally {
       setPingingIndex(null);
-    }, 700);
+    }
   };
 
   return (
@@ -157,7 +149,7 @@ export default function ServerConfigModal({
           ) : (
             serverList.map((server, idx) => (
               <div key={server.id || server.name} className="server-card-item">
-                <div className={`status-dot ${server.status === 'connected' ? 'connected' : 'pending'}`} />
+                <div className={`status-dot ${server.status === 'connected' ? 'connected' : server.status === 'error' ? 'disconnected' : 'pending'}`} />
                 <div className="server-card-info">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span className="server-card-name">{server.name}</span>

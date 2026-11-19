@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Settings, X, Hexagon, Sliders, Shield, Palette, Database, Trash2, RotateCcw, Sparkles } from 'lucide-react';
 
 export default function SettingsDrawer({
@@ -10,6 +10,9 @@ export default function SettingsDrawer({
   onResetSettings,
   onOpenTour
 }) {
+  const [apiToken, setApiToken] = useState(() => {
+    try { return window.sessionStorage.getItem('orchestrator_api_token') || ''; } catch { return ''; }
+  });
   if (!isOpen) return null;
 
   return (
@@ -37,43 +40,13 @@ export default function SettingsDrawer({
             <div className="settings-toggle-row">
               <div>
                 <div className="settings-toggle-label">Show Routing Timeline</div>
-                <div className="settings-toggle-desc">Display intent classification & confidence scores</div>
+                <div className="settings-toggle-desc">Display the server and tool match scores for each request</div>
               </div>
               <label className="toggle-switch">
                 <input
                   type="checkbox"
                   checked={settings.showControlPlane ?? true}
                   onChange={() => onToggleSetting('showControlPlane')}
-                />
-                <span className="toggle-slider" />
-              </label>
-            </div>
-
-            <div className="settings-toggle-row">
-              <div>
-                <div className="settings-toggle-label">Context-Aware Prioritizer</div>
-                <div className="settings-toggle-desc">Rank servers by time, intent, and historical signals</div>
-              </div>
-              <label className="toggle-switch">
-                <input
-                  type="checkbox"
-                  checked={settings.autoRoute ?? true}
-                  onChange={() => onToggleSetting('autoRoute')}
-                />
-                <span className="toggle-slider" />
-              </label>
-            </div>
-
-            <div className="settings-toggle-row">
-              <div>
-                <div className="settings-toggle-label">Persistent Memory Buffer</div>
-                <div className="settings-toggle-desc">Retain preferences across tasks without token silos</div>
-              </div>
-              <label className="toggle-switch">
-                <input
-                  type="checkbox"
-                  checked={settings.persistentMemory ?? true}
-                  onChange={() => onToggleSetting('persistentMemory')}
                 />
                 <span className="toggle-slider" />
               </label>
@@ -99,7 +72,28 @@ export default function SettingsDrawer({
           <div className="settings-section">
             <div className="settings-section-title">
               <Database size={12} style={{ display: 'inline', marginRight: '6px' }} />
-              Python Backend Bridge
+              FastAPI Backend
+            </div>
+
+            <div className="config-input-group" style={{ marginTop: '10px' }}>
+              <label htmlFor="backend-api-token">Backend access token (optional)</label>
+              <input
+                id="backend-api-token"
+                className="config-input"
+                type="password"
+                autoComplete="off"
+                placeholder="Required only when backend auth is enabled"
+                value={apiToken}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setApiToken(value);
+                  try {
+                    if (value) window.sessionStorage.setItem('orchestrator_api_token', value);
+                    else window.sessionStorage.removeItem('orchestrator_api_token');
+                  } catch { /* Keep current-session app usable if storage is unavailable. */ }
+                }}
+              />
+              <div className="settings-toggle-desc">Kept in this browser tab’s session storage. Configure the same value as ORCHESTRATOR_API_KEY on the backend.</div>
             </div>
 
             <div className="backend-bridge-card">
@@ -108,11 +102,11 @@ export default function SettingsDrawer({
                 <span className="bridge-port-badge">PORT 8000</span>
               </div>
               <div className="bridge-desc">
-                When you run your Python backend (<code>python server.py</code> or FastAPI), Vite automatically proxies <code>/mcp</code>, <code>/chat</code>, and <code>/servers</code> to <code>http://127.0.0.1:8000</code>.
+                Start it with <code>cd backend && uvicorn app:app --reload --port 8000</code>. Vite proxies <code>/api</code> to <code>http://127.0.0.1:8000</code>.
               </div>
               <div className="bridge-proxy-list">
-                <span>Proxy endpoints:</span>
-                <code>/chat</code> &bull; <code>/mcp</code> &bull; <code>/servers</code> &bull; <code>/health</code>
+                <span>API endpoints:</span>
+                <code>/api/chat</code> &bull; <code>/api/servers</code> &bull; <code>/api/history</code> &bull; <code>/api/health</code>
               </div>
             </div>
           </div>
