@@ -1,0 +1,54 @@
+# ==============================================================================
+# MCP-Orchestrator — Context-Aware Scoring & Prioritization Configuration
+# ==============================================================================
+# Formula: Score(T) = w1 * U(T) + w2 * S(T) + w3 * T(T) + w4 * A(T)
+#
+# All weights, time-slot priors, and pruning thresholds are externalized here.
+# Zero hardcoded magic numbers — modify this file to re-weight priority policies.
+# ==============================================================================
+
+# Core Multi-Factor Utility Equation Weights (Sum = 1.0)
+formula_weights:
+  w1_urgency: 0.35            # Real-time task urgency / SLA priority
+  w2_spatial: 0.25            # Spatial proximity factor (1 - distance / max_radius)
+  w3_temporal: 0.20           # Time-of-day suitability (operating hours alignment)
+  w4_affinity: 0.20           # Historical user affinity and frequency
+
+# Algorithmic Context Pruning Parameters
+pruning:
+  top_k: 3                    # Number of top candidate tool schemas retained in prompt
+  token_reduction_target: 0.40 # Target prompt token reduction SLA (>= 40%)
+  min_score_threshold: 0.10   # Discard tools with utility score below this floor
+
+# 3-Tier Finite State Machine (FSM) Degradation Thresholds
+resilience_fsm:
+  llm_timeout_ms: 5000        # Triggers transition from FULL to DEGRADED state
+  db_timeout_ms: 2000         # Triggers transition from DEGRADED to SURVIVAL state
+  max_parallel_discovery: 6   # Max concurrent MCP server tool discovery handshakes
+
+# Temporal Suitability Matrix (Time-of-day base scores per domain)
+temporal_matrix:
+  morning:                    # 06:00 - 12:00
+    relational_database: 0.85
+    local_filesystem: 0.90
+    weather_telemetry: 0.80
+    rapid_delivery: 0.50
+    dining_booking: 0.15
+  afternoon:                  # 12:00 - 17:00
+    relational_database: 0.90
+    local_filesystem: 0.85
+    weather_telemetry: 0.70
+    rapid_delivery: 0.75
+    dining_booking: 0.40
+  evening:                    # 17:00 - 23:00
+    relational_database: 0.60
+    local_filesystem: 0.50
+    weather_telemetry: 0.65
+    rapid_delivery: 0.85
+    dining_booking: 0.95
+  late_night:                 # 23:00 - 06:00
+    relational_database: 0.30
+    local_filesystem: 0.30
+    weather_telemetry: 0.40
+    rapid_delivery: 0.90
+    dining_booking: 0.10
