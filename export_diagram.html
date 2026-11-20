@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MCP-Orchestrator Architecture Diagram Exporter</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      padding: 30px;
+      background: #09090b;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header {
+      text-align: center;
+      max-width: 900px;
+      margin-bottom: 25px;
+    }
+    h1 {
+      font-size: 26px;
+      margin-bottom: 6px;
+      background: linear-gradient(135deg, #60a5fa, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 14px;
+      margin: 4px 0;
+    }
+    .toolbar {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 25px;
+      background: rgba(255, 255, 255, 0.04);
+      padding: 10px 18px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-primary {
+      background: #3b82f6;
+      color: #ffffff;
+    }
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-1px);
+    }
+    .btn-purple {
+      background: #8b5cf6;
+      color: #ffffff;
+    }
+    .btn-purple:hover {
+      background: #7c3aed;
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+    #diagram-container {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-radius: 16px;
+      padding: 40px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      max-width: 1200px;
+      width: 100%;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>MCP-Orchestrator: 4-Layer System Architecture</h1>
+    <p>Capstone Final Review • Prof. Prachi Jain • SDP ID: AP2026272000419</p>
+    <div class="status-badge">Ready for PowerPoint Export</div>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="downloadPNG()">
+      💾 Download as High-Res PNG (for PPT)
+    </button>
+    <button class="btn btn-purple" onclick="downloadSVG()">
+      📐 Download as Vector SVG
+    </button>
+    <button class="btn btn-secondary" onclick="window.print()">
+      🖨️ Print / Save to PDF
+    </button>
+  </div>
+
+  <div id="diagram-container">
+    <div class="mermaid" id="mermaid-graph">
+flowchart TD
+    %% LAYER 1: CLIENT & SENSORY INTERFACE
+    subgraph L1 ["LAYER 1: Client & Sensory Interface (React 19 + Vite PWA)"]
+        UI["Universal Control Plane Dashboard<br/>(Glassmorphic Dark UI / Command Dock)"]
+        Sensors["Environmental Context Simulator<br/>(Urgency Slider, Live Clock, GPS Location)"]
+        ArgModal["Missing-Argument Interception Modal<br/>(Human-in-the-Loop Feedback)"]
+    end
+
+    %% LAYER 2: CORE ORCHESTRATION & STATE PLANE
+    subgraph L2 ["LAYER 2: Core Orchestration & Hybrid State Plane (FastAPI + Asyncio)"]
+        API["FastAPI Ingress Gateway<br/>(/api/chat, /api/servers, /api/history)"]
+        Engine["Context Prioritization Engine<br/>Score = w1·U + w2·D + w3·T + w4·A"]
+        Pruner["Top-K Candidate Tool Pruner<br/>(Prunes schemas; saves 44.6% tokens)"]
+        Validator["JSON Schema Validator & Parameter Inference<br/>(Enforces strict inputSchema before call)"]
+        Dispatcher["JSON-RPC 2.0 Execution Dispatcher<br/>(Async timeout sandboxing)"]
+        DBStore[("Dual Persistence Store<br/>SQLite WAL Mode + Cloud PostgreSQL")]
+        EdgeCache[("In-Memory Resilience Fallback<br/>Local seed cache for 100% uptime")]
+    end
+
+    %% LAYER 3: HETEROGENEOUS MCP PROTOCOL MESH
+    subgraph L3 ["LAYER 3: Heterogeneous MCP Protocol Mesh (Anthropic 2026-07-28 Spec)"]
+        Transport["Asynchronous Transport Pool<br/>(Stdio + Server-Sent Events SSE + HTTP)"]
+        NodeDB["PostgreSQL MCP Node<br/>• query_database<br/>• Relational records & revenue"]
+        NodeWeather["Weather Telemetry MCP Node<br/>• get_weather<br/>• Atmospheric readings & sensors"]
+        NodeFS["Local Filesystem MCP Node<br/>• read_workspace_file<br/>• Manifests & configurations"]
+        NodeDelivery["Rapid Delivery MCP Node<br/>• express_dispatch<br/>• Drone courier & ETA tracking"]
+        NodeBooking["Dining Reservation MCP Node<br/>• reserve_table<br/>• Venue slot locks & booking"]
+    end
+
+    %% LAYER 4: QA, BENCHMARKING & RESILIENCE SUITE
+    subgraph L4 ["LAYER 4: QA, Telemetry & Resilience Suite"]
+        QASuite["14-Suite Automated Regression Suite<br/>(Pytest / unittest, 100% pass rate)"]
+        Profiler["Real-Time Token & Latency Profiler<br/>(17 ms routing, 44.6% token cut)"]
+        FSM["3-Tier Graceful Degradation Manager<br/>(FULL → DEGRADED → SURVIVAL)"]
+    end
+
+    %% INTER-LAYER DATA FLOW CONNECTIONS
+    UI --> API
+    Sensors --> API
+    ArgModal <--> API
+    
+    API --> Engine
+    Engine --> Pruner
+    Pruner --> Validator
+    Validator --> Dispatcher
+    
+    Dispatcher <--> DBStore
+    DBStore -.->|Failover| EdgeCache
+    
+    Dispatcher --> Transport
+    Transport --> NodeDB
+    Transport --> NodeWeather
+    Transport --> NodeFS
+    Transport --> NodeDelivery
+    Transport --> NodeBooking
+    
+    Dispatcher -.-> Profiler
+    FSM -.-> Engine
+
+    %% VISUAL STYLING
+    style L1 fill:#09090b,stroke:#3b82f6,stroke-width:2px,color:#fff
+    style L2 fill:#0f172a,stroke:#6366f1,stroke-width:2px,color:#fff
+    style L3 fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#fff
+    style L4 fill:#451a03,stroke:#f59e0b,stroke-width:2px,color:#fff
+    
+    style UI fill:#1e293b,stroke:#3b82f6,color:#fff
+    style Sensors fill:#1e293b,stroke:#3b82f6,color:#fff
+    style ArgModal fill:#1e293b,stroke:#3b82f6,color:#fff
+    
+    style API fill:#1e1b4b,stroke:#818cf8,color:#fff
+    style Engine fill:#1e1b4b,stroke:#818cf8,color:#fff
+    style Pruner fill:#1e1b4b,stroke:#818cf8,color:#fff
+    style Validator fill:#1e1b4b,stroke:#818cf8,color:#fff
+    style Dispatcher fill:#1e1b4b,stroke:#818cf8,color:#fff
+    style DBStore fill:#1e1b4b,stroke:#818cf8,color:#fff
+    style EdgeCache fill:#1e1b4b,stroke:#818cf8,color:#fff
+    
+    style Transport fill:#065f46,stroke:#34d399,color:#fff
+    style NodeDB fill:#065f46,stroke:#34d399,color:#fff
+    style NodeWeather fill:#065f46,stroke:#34d399,color:#fff
+    style NodeFS fill:#065f46,stroke:#34d399,color:#fff
+    style NodeDelivery fill:#065f46,stroke:#34d399,color:#fff
+    style NodeBooking fill:#065f46,stroke:#34d399,color:#fff
+    
+    style QASuite fill:#78350f,stroke:#fbbf24,color:#fff
+    style Profiler fill:#78350f,stroke:#fbbf24,color:#fff
+    style FSM fill:#78350f,stroke:#fbbf24,color:#fff
+    </div>
+  </div>
+
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: 'dark',
+      flowchart: {
+        useMaxWidth: false,
+        htmlLabels: true,
+        curve: 'basis'
+      }
+    });
+
+    function getSvgElement() {
+      return document.querySelector('#mermaid-graph svg') || document.querySelector('#diagram-container svg');
+    }
+
+    function downloadSVG() {
+      const svg = getSvgElement();
+      if (!svg) {
+        alert('Diagram is still rendering, please wait a moment.');
+        return;
+      }
+      const serializer = new XMLSerializer();
+      let source = serializer.serializeToString(svg);
+      if(!source.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)){
+        source = source.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+      }
+      const blob = new Blob([source], {type: "image/svg+xml;charset=utf-8"});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "MCP_Orchestrator_Architecture_Diagram.svg";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+
+    function downloadPNG() {
+      const svg = getSvgElement();
+      if (!svg) {
+        alert('Diagram is still rendering, please wait a moment.');
+        return;
+      }
+      const serializer = new XMLSerializer();
+      let svgString = serializer.serializeToString(svg);
+      const bbox = svg.getBoundingClientRect();
+      const scale = 2.5; // High resolution scale factor
+      const width = (bbox.width || 1200) * scale;
+      const height = (bbox.height || 1400) * scale;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+
+      // Draw dark background
+      ctx.fillStyle = "#0f172a";
+      ctx.fillRect(0, 0, width, height);
+
+      const img = new Image();
+      const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      img.onload = function() {
+        ctx.drawImage(img, 0, 0, width, height);
+        URL.revokeObjectURL(url);
+        
+        const pngUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = pngUrl;
+        link.download = 'MCP_Orchestrator_Architecture_Diagram.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      };
+      img.src = url;
+    }
+  </script>
+</body>
+</html>
